@@ -102,18 +102,6 @@ class Label(Control):
         self.ctrl = wx.StaticText( parent, wx.ID_ANY, self.text, wx.DefaultPosition, wx.DefaultSize, 0|flags )
         registerCtrl( self.name, self.ctrl )
     
-class Label(Control):
-    def __init__(self,name,text="",expand=False,proportion=0,multiline=False):
-        super().__init__(name,proportion)
-        self.text = text
-        self.multiline = multiline
-    def create(self,parent):
-        flags = 0
-        if self.multiline == True:
-            flags |= wx.TE_MULTILINE
-        self.ctrl = wx.StaticText( parent, wx.ID_ANY, self.text, wx.DefaultPosition, wx.DefaultSize, 0|flags )
-        registerCtrl( self.name, self.ctrl )
-        
 class Bitmap(Control):
     def __init__(self,name,filename=None,bitmap=None,expand=True,proportion=0):
         super().__init__(name,expand,proportion)

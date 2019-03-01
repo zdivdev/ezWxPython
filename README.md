@@ -170,8 +170,8 @@ Generated Form.
 
 * More controls support
 * Container support
-* Timer and idle event support
+* Timer event support
 * Thread interface
 * Command shell interface
-* Network interface like ssh, sftp, ftp, telnet control
-* 3rd party library support like matplotlib, PIL, FPDF and etc.
+* Network interface support : ssh, sftp, ftp, telnet and etc
+* 3rd party library support : matplotlib, PIL, FPDF and etc.

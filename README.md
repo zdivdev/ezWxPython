@@ -16,23 +16,23 @@ import ezWxPython as ezwx
 # Handler
 ######################################################################
 
-def onExit(parent):
+def onExit(event):
     sys.exit()
 
-def onAbout(parent):
+def onAbout(event):
     print("onAbout()")
     
-def onCopy(parent):
+def onCopy(event):
     print("onCopy()")
     
-def onBrowse(parent):
+def onBrowse(event):
     folder = ezwx.DirectoryDialog()
     text = ezwx.getCtrl('folder')
     if text is not None:
         text.write(folder)    
     
-def onFileBrowse(parent):
-    files = ezwx.OpenFileDialog(multiple=False)
+def onFileBrowse(event):
+    files = ezwx.OpenFileDialog()
     text = ezwx.getCtrl('text')
     if text is not None:
         if type(files) is list:
@@ -41,11 +41,26 @@ def onFileBrowse(parent):
         else:
             text.write(files + "\n") 
             
-def onTextAdd(parent):
+def onTextAdd(event):
     text = ezwx.getCtrl('text')
     if text is not None:
         text.write("Text Append \n")
+      
+def onChoice(event):
+    ctrl = ezwx.getCtrl('choice')
+    print(ctrl.GetSelection(), ctrl.GetStringSelection())
+    print(event)
         
+def onCombo(event):
+    ctrl = ezwx.getCtrl('combo')
+    print(ctrl.GetSelection(), ctrl.GetStringSelection())
+    print(event)
+        
+def onList(event):
+    ctrl = ezwx.getCtrl('list')
+    print(ctrl.GetSelection(), ctrl.GetStringSelection())
+    print(event)
+    
 ######################################################################
 # Layout
 ######################################################################
@@ -59,9 +74,9 @@ menu_def = {
             "Settings" : None, 
             "Copy": onCopy 
         }, 
-        "-" : None,                  # menu separator  
-        "Exit" : [onExit, exit_png], # menu with image icon
-        "-2" : None,                 # menu saparator shoud have different name 
+        "-" : None, 
+        "Exit" : [onExit, exit_png],
+        "-2" : None, 
     }, 
     "Help" : { 
         "About" : onAbout 
@@ -70,14 +85,14 @@ menu_def = {
 
 tool_def = [ #icon, text, handler
     [exit_png, onExit, "Exit" ],
-    [None],                          # tool separator
-    [save_png, None, "Save", ],      # disabled tool item with no handler
+    [None],
+    [save_png, None, "Save", ],
 ]
 
 status_def = [
-    ["Ready", -6],                   # expand width with radio 6
-    ["Status", -4],                  # expand width with ratio 4 
-    ["Code:1", 20]                   # fixed width 
+    ["Ready", -6],
+    ["Status", -4],
+    ["Code:1", 20]
 ]
 
 body_def = [
@@ -85,8 +100,14 @@ body_def = [
       ezwx.Text("folder",proportion=1), 
       ezwx.Button("browse", "Folder", handler=onBrowse),
       ezwx.Button("file_browse", "Files", handler=onFileBrowse)],
-    [ ezwx.Text("text",proportion=1,multiline=True), 
-      True ],                        # vertical proportion 1
+    [ ezwx.Label("","Choices: "), 
+      ezwx.Choice("choice",0,['apple','orange','grape'],handler=onChoice),
+      ezwx.Label("","  ComboBox: "), 
+      ezwx.Combo("combo","orange", [ 'apple','orange','grape'],handler=onCombo) ],
+    [ ezwx.List("list",2,['apple','orange','grape'],expand=True,proportion=1,handler=onList),
+      ezwx.Text("text",proportion=1,expand=True,multiline=True), 
+      ezwx.Bitmap("bitmap",filename="D:\\Lenna.png",expand=True,proportion=1),
+      True ],
     [ None, ezwx.Button("text_add", "Text Add", handler=onTextAdd) ],
 ]
 
@@ -109,7 +130,7 @@ if __name__ == "__main__":
 
 Generated Form.
 
-![basic_form](https://2.bp.blogspot.com/-sBJorLFGFas/XHfosG-0GaI/AAAAAAAAAgo/3kwk25GXuP0ecrsiLM6r4qhNWeIeBVTogCLcBGAs/s1600/win.png)   
+![basic_form](https://1.bp.blogspot.com/-UkwWduLGjGY/XHklvH3EBBI/AAAAAAAAAhE/yktGEW0kMY409R6KoLz3lHegIYMNOZp6ACLcBGAs/s1600/win2.png)   
 
 
 ## Status
@@ -123,10 +144,13 @@ Generated Form.
 
 ### Supported Controls
 
-* Label : StaticText
 * Bitmap : StaticBitmap
 * Button
-* TextArea
+* Choice : ChoiceBox
+* Combo : ComboBox
+* Label : StaticText
+* List : ListBox
+* Text : TextArea
 
 ### Supported Dialogs
 

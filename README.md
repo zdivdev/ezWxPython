@@ -17,10 +17,13 @@ import ezWxPython as ezwx
 ######################################################################
 
 def onExit(event):
-    sys.exit()
+    rv = ezwx.MessageYesNo("Alert", "Do you want to quit ?" )
+    print(rv)
+    if rv is True:
+        sys.exit()
 
 def onAbout(event):
-    print("onAbout()")
+    ezwx.MessageBox("About", "eezWxPython Demo\nzdiv")
     
 def onCopy(event):
     print("onCopy()")
@@ -155,8 +158,11 @@ Generated Form.
 ### Supported Dialogs
 
 * Directory Choose Dialog
-* Open File Dialog with multiple file selection support
-* Save File Dialog
+* Open File Dialog with multiple file selection support (return full path)
+* Save File Dialog (return full path)
+* MessageBox 
+* MessageYesNo : True, False
+* MessageYesNoCancel : True, False, None
 
 ## Todo
 

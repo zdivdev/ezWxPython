@@ -144,6 +144,8 @@ Generated Form.
 * Toolbar generation from list with icon buttons + optional text.
 * Statusbar generation from list
 * Body (Client Area) generation from 2-dimentional list. (single VBox + multiple HBoxes)
+* Close Event Handler 
+* Idle Event Handler
 
 ### Supported Controls
 
@@ -173,5 +175,3 @@ Generated Form.
 * Command shell interface
 * Network interface like ssh, sftp, ftp, telnet control
 * 3rd party library support like matplotlib, PIL, FPDF and etc.
-
-

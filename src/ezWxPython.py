@@ -238,6 +238,12 @@ class WxApp():
     def Show(self):
         self.frame.Show()
         
+    def closeHandle(self,handler):
+        self.frame.Bind(wx.EVT_CLOSE, handler)
+     
+    def idleHandle(self,handler):
+        self.frame.Bind(wx.EVT_IDLE, handler)
+        
     def makeMenu(self, value):
         menu = wx.Menu()
         for k, v in value.items():
@@ -357,5 +363,4 @@ class WxApp():
             self.makeStatusBar(layout['status'])
         if 'body' in layout:
             self.makeBody(layout['body'])
-        
-    
+

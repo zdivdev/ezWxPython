@@ -6,22 +6,22 @@ import ezWxPython as ezwx
 # Handler
 ######################################################################
 
-def onExit(parent):
+def onExit(event):
     sys.exit()
 
-def onAbout(parent):
+def onAbout(event):
     print("onAbout()")
     
-def onCopy(parent):
+def onCopy(event):
     print("onCopy()")
     
-def onBrowse(parent):
+def onBrowse(event):
     folder = ezwx.DirectoryDialog()
     text = ezwx.getCtrl('folder')
     if text is not None:
         text.write(folder)    
     
-def onFileBrowse(parent):
+def onFileBrowse(event):
     files = ezwx.OpenFileDialog()
     text = ezwx.getCtrl('text')
     if text is not None:
@@ -31,11 +31,26 @@ def onFileBrowse(parent):
         else:
             text.write(files + "\n") 
             
-def onTextAdd(parent):
+def onTextAdd(event):
     text = ezwx.getCtrl('text')
     if text is not None:
         text.write("Text Append \n")
+      
+def onChoice(event):
+    ctrl = ezwx.getCtrl('choice')
+    print(ctrl.GetSelection(), ctrl.GetStringSelection())
+    print(event)
         
+def onCombo(event):
+    ctrl = ezwx.getCtrl('combo')
+    print(ctrl.GetSelection(), ctrl.GetStringSelection())
+    print(event)
+        
+def onList(event):
+    ctrl = ezwx.getCtrl('list')
+    print(ctrl.GetSelection(), ctrl.GetStringSelection())
+    print(event)
+    
 ######################################################################
 # Layout
 ######################################################################
@@ -75,7 +90,14 @@ body_def = [
       ezwx.Text("folder",proportion=1), 
       ezwx.Button("browse", "Folder", handler=onBrowse),
       ezwx.Button("file_browse", "Files", handler=onFileBrowse)],
-    [ ezwx.Text("text",proportion=1,multiline=True), True ],
+    [ ezwx.Label("","Choices: "), 
+      ezwx.Choice("choice",0,['apple','orange','grape'],handler=onChoice),
+      ezwx.Label("","  ComboBox: "), 
+      ezwx.Combo("combo","orange", [ 'apple','orange','grape'],handler=onCombo) ],
+    [ ezwx.List("list",2,['apple','orange','grape'],expand=True,proportion=1,handler=onList),
+      ezwx.Text("text",proportion=1,expand=True,multiline=True), 
+      ezwx.Bitmap("bitmap",filename="D:\\Lenna.png",expand=True,proportion=1),
+      True ],
     [ None, ezwx.Button("text_add", "Text Add", handler=onTextAdd) ],
 ]
 

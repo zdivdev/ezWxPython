@@ -50,17 +50,9 @@ def getBitmap(data):
     return bitmap
     
 ######################################################################
-# Controls
+# Layouts
 ######################################################################
 
-class Control():
-    def __init__(self,name,expand=True,proportion=0,border=2):
-        self.ctrl = None
-        self.name = name
-        self.expand = expand
-        self.proportion = proportion    
-        self.border=2
-        
 class VBox():
     def __init__(self,orient=wx.VERTICAL,proportion=0):
         self.ctrl = wx.BoxSizer( orient )
@@ -79,6 +71,34 @@ class HBox(VBox):
         super().__init__(orient,proportion)
         pass
 
+######################################################################
+# Controls
+######################################################################
+
+class Control():
+    def __init__(self,name,expand=False,proportion=0,border=2):
+        self.ctrl = None
+        self.name = name
+        self.expand = expand
+        self.proportion = proportion    
+        self.border=2
+
+class Bitmap(Control):
+    def __init__(self,name,filename=None,bitmap=None,expand=False,proportion=0):
+        super().__init__(name,expand,proportion)
+        self.bitmap = bitmap
+        self.filename = filename
+    def create(self,parent):
+        flags = wx.ALIGN_CENTER
+        if self.filename is not None:
+            self.bitmap = wx.Bitmap( self.filename, wx.BITMAP_TYPE_ANY )
+        self.ctrl = wx.StaticBitmap( parent, wx.ID_ANY, self.bitmap, wx.DefaultPosition, wx.DefaultSize, 0|flags )
+        self.ctrl.Bind( wx.EVT_SIZE, self.onEvtBitmapSize )
+        registerCtrl( self.name, self.ctrl )
+    def onEvtBitmapSize(self,event):
+        #print("onEvtBitmapSize()",event.GetSize()) #(width, height)
+        event.Skip()
+
 class Button(Control):
     def __init__(self,name,label="",handler=None,expand=False,proportion=0):
         super().__init__(name,expand,proportion)
@@ -89,7 +109,32 @@ class Button(Control):
         self.ctrl = wx.Button( parent, id, self.label, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
         registerCtrl( self.name, self.ctrl )
-     
+    
+class Choice(Control):
+    def __init__(self,name,select=0,choices=[],handler=None,expand=False,proportion=0):
+        super().__init__(name,expand,proportion)
+        self.select = select
+        self.choices = choices
+        self.handler = handler
+    def create(self,parent):        
+        id = getId()
+        self.ctrl = wx.Choice( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
+        self.ctrl.SetSelection(self.select)
+        self.ctrl.Bind( wx.EVT_CHOICE, self.handler, id=id )
+        registerCtrl( self.name, self.ctrl )
+
+class Combo(Control):
+    def __init__(self,name,value="",choices=[],handler=None,expand=False,proportion=0):
+        super().__init__(name,expand,proportion)
+        self.value = value
+        self.choices = choices
+        self.handler = handler
+    def create(self,parent):        
+        id = getId()
+        self.ctrl = wx.ComboBox( parent, id, self.value, wx.DefaultPosition, wx.DefaultSize, self.choices, 0 )
+        self.ctrl.Bind( wx.EVT_COMBOBOX, self.handler, id=id )
+        registerCtrl( self.name, self.ctrl )
+         
 class Label(Control):
     def __init__(self,name,text="",expand=False,proportion=0,multiline=False):
         super().__init__(name,proportion)
@@ -102,16 +147,18 @@ class Label(Control):
         self.ctrl = wx.StaticText( parent, wx.ID_ANY, self.text, wx.DefaultPosition, wx.DefaultSize, 0|flags )
         registerCtrl( self.name, self.ctrl )
     
-class Bitmap(Control):
-    def __init__(self,name,filename=None,bitmap=None,expand=True,proportion=0):
+
+class List(Control):
+    def __init__(self,name,select=0,choices=[],handler=None,expand=False,proportion=0):
         super().__init__(name,expand,proportion)
-        self.bitmap = bitmap
-        self.filename = filename
-    def create(self,parent):
-        flags = wx.ALIGN_CENTER
-        if self.filename is not None:
-            self.bitmap = wx.Bitmap( self.filename, wx.BITMAP_TYPE_ANY )
-        self.ctrl = wx.StaticBitmap( parent, wx.ID_ANY, self.bitmap, wx.DefaultPosition, wx.DefaultSize, 0|flags )
+        self.select = select
+        self.choices = choices
+        self.handler = handler
+    def create(self,parent):        
+        id = getId()
+        self.ctrl = wx.ListBox( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
+        self.ctrl.SetSelection(self.select)
+        self.ctrl.Bind( wx.EVT_CHOICE, self.handler, id=id )
         registerCtrl( self.name, self.ctrl )
     
 class Text(Control):
@@ -289,3 +336,4 @@ class WxApp():
         if 'body' in layout:
             self.makeBody(layout['body'])
         
+    

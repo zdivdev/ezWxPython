@@ -146,6 +146,7 @@ Generated Form.
 * Body (Client Area) generation from 2-dimentional list. (single VBox + multiple HBoxes)
 * Close Event Handler 
 * Idle Event Handler
+* TextArea with Drag and Drop files
 
 ### Supported Controls
 
@@ -155,7 +156,7 @@ Generated Form.
 * Combo : ComboBox
 * Label : StaticText
 * List : ListBox
-* Text : TextArea
+* Text : TextArea + drag and drop files
 
 ### Supported Dialogs
 

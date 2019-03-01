@@ -199,6 +199,28 @@ def DirectoryDialog(defaultPath=""):
     dlg.ShowModal()
     return dlg.GetPath()
 
+def MessageBox(title,message):
+    dlg = wx.MessageDialog(None, message, caption=title, style=wx.OK|wx.CENTER, pos=wx.DefaultPosition)    
+    dlg.ShowModal()
+    
+def MessageYesNo(title,message):
+    dlg = wx.MessageDialog(None, message, caption=title, style=wx.YES|wx.NO|wx.CENTER, pos=wx.DefaultPosition)     
+    rv = dlg.ShowModal()
+    if rv == wx.ID_OK or rv == wx.ID_YES:
+        return True
+    else: #wx.ID_CANCEL, wx.ID_NO 
+        return False
+    
+def MessageYesNoCancel(title,message):
+    dlg = wx.MessageDialog(None, message, caption=title, style=wx.YES|wx.NO|wx.CANCEL|wx.CENTER, pos=wx.DefaultPosition)     
+    rv = dlg.ShowModal()
+    if rv == wx.ID_OK or rv == wx.ID_YES:
+        return True
+    elif rv == wx.ID_NO:
+        return False
+    else: #wx.ID_CANCEL, 
+        return None
+    
 ######################################################################
 # WxApp
 ######################################################################

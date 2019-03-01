@@ -7,10 +7,13 @@ import ezWxPython as ezwx
 ######################################################################
 
 def onExit(event):
-    sys.exit()
+    rv = ezwx.MessageYesNo("Alert", "Do you want to quit ?" )
+    print(rv)
+    if rv is True:
+        sys.exit()
 
 def onAbout(event):
-    print("onAbout()")
+    ezwx.MessageBox("About", "eezWxPython Demo\nzdiv")
     
 def onCopy(event):
     print("onCopy()")

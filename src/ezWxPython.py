@@ -75,6 +75,14 @@ class HBox(VBox):
 # Controls
 ######################################################################
 
+class FileDrop(wx.FileDropTarget):
+    def __init__(self, window):
+        wx.FileDropTarget.__init__(self)
+        self.window = window
+    def OnDropFiles(self, x, y, filenames):
+        self.window.drop_handle(filenames)
+        return True
+    
 class Control():
     def __init__(self,name,expand=False,proportion=0,border=2):
         self.ctrl = None
@@ -172,8 +180,15 @@ class Text(Control):
         if self.multiline == True:
             flags |= wx.TE_MULTILINE
         self.ctrl = wx.TextCtrl( parent, wx.ID_ANY, self.text, wx.DefaultPosition, wx.DefaultSize, 0|flags )
+        drop_target = FileDrop(self)
+        self.ctrl.SetDropTarget(drop_target)
         registerCtrl( self.name, self.ctrl )
-
+    def drop_handle(self,filenames):
+        for filename in filenames:
+            self.ctrl.AppendText( filename + '\n' )
+            if self.multiline is False:
+                break
+            
 ######################################################################
 # Dialogs
 ######################################################################
@@ -237,6 +252,7 @@ class WxApp():
     
     def Show(self):
         self.frame.Show()
+    
         
     def closeHandle(self,handler):
         self.frame.Bind(wx.EVT_CLOSE, handler)
@@ -363,4 +379,3 @@ class WxApp():
             self.makeStatusBar(layout['status'])
         if 'body' in layout:
             self.makeBody(layout['body'])
-

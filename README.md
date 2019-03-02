@@ -116,11 +116,14 @@ Generated Form.
 
 * Bitmap : StaticBitmap
 * Button
+* Calendar : CalendarCtrl
 * Choice : ChoiceBox
 * Combo : ComboBox
+* Date : DatePickerCtrl
 * Label : StaticText
 * List : ListBox
 * Text : TextArea + drag and drop files
+* Time : TimePickerCtrl
 
 ### Supported Dialogs
 

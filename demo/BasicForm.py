@@ -8,16 +8,11 @@ import ezWxPython as ezwx
 ######################################################################
 
 def onExit(event):
+    ezwx.WxAppClose()
+    
+def onClose(event): #return True if want to exit
     rv = ezwx.MessageYesNo("Alert", "Do you want to quit ?" )
-    print(rv)
-    if rv is True:
-        sys.exit()
-
-def onClose(event):
-    rv = ezwx.MessageYesNoCancel("Alert", "Do you want to quit ?" )
-    print(rv)
-    if rv is True:
-        sys.exit()
+    return rv
         
 idle_time = 0
 idle_count = 0
@@ -34,8 +29,19 @@ def onIdle(event):
 def onTimer(event):
     text = ezwx.getWxCtrl('text')
     if text is not None:
-        text.write(time.ctime() + "\n")
+        text.write('[Timer]' + time.ctime() + "\n")
     
+def onThreadAction():
+    text = ezwx.getWxCtrl('text')
+    if text is not None:
+        text.write('[Thread' + time.ctime() + "\n")
+    
+def onThread():
+    from time import sleep
+    while ezwx.isWxAppRun():
+        ezwx.callAfter(onThreadAction)
+        sleep(1.0)    
+        
 def onAbout(event):
     ezwx.MessageBox("About", "eezWxPython Demo\nzdiv")
     
@@ -58,30 +64,31 @@ def onFileBrowse(event):
         else:
             text.write(files + "\n") 
             
-def onButton(event):
+def onThreadButton(event):
+    ezwx.threadHandle(onThread, key='thread')    
+    ezwx.threadStart('thread')
+        
+def onTimerButton(event):
     timer = ezwx.getWxTimer('timer')
     button = ezwx.getWxCtrl('button')
-    if button.GetLabel() == 'Start':
-        button.SetLabel('Stop')
+    if button.GetLabel() == 'StartTimer':
+        button.SetLabel('StopTimer')
         timer.Start(1000)
     else:
-        button.SetLabel('Start')
+        button.SetLabel('StartTimer')
         timer.Stop()
       
 def onChoice(event):
     ctrl = ezwx.getWxCtrl('choice')
     print(ctrl.GetSelection(), ctrl.GetStringSelection())
-    print(event)
         
 def onCombo(event):
     ctrl = ezwx.getWxCtrl('combo')
     print(ctrl.GetSelection(), ctrl.GetStringSelection())
-    print(event)
         
 def onList(event):
     ctrl = ezwx.getWxCtrl('list')
     print(ctrl.GetSelection(), ctrl.GetStringSelection())
-    print(event)
     
 ######################################################################
 # Layout
@@ -93,12 +100,12 @@ save_png="eJyVVH1MG2UYPyhjjJWvhOgkQY5Dp9nW3l2/e6Urd70eNK4dKSXUMEOP9kpvbe9ud1daiB
 menu_def = { 
     "File" : { 
         "Option" : { 
-            "Settings" : None, 
+            "Settings" : None,        # Disabled menu item
             "Copy": onCopy 
         }, 
-        "-" : None, 
-        "Exit" : [onExit, exit_png],
-        "-2" : None, 
+        "-" : None,                   # Menu separator
+        "Exit" : [onExit, exit_png],  # Menu item with base64-encoded icon image
+        "-2" : None,                  # Menu separator (should have different name from other menu separator) 
     }, 
     "Help" : { 
         "About" : onAbout 
@@ -107,14 +114,14 @@ menu_def = {
 
 tool_def = [ #icon, text, handler
     [exit_png, onExit, "Exit" ],
-    [None],
-    [save_png, None, "Save", ],
+    [None],                         # Tool separator
+    [save_png, None, "Save", ],     # Disabled toolbar item
 ]
 
 status_def = [
-    ["Ready", -6],
-    ["Status", -4],
-    ["Code:1", 20]
+    ["Ready", -6],   # width will have space with proportion 6 
+    ["Status", -4],  # width will have space with proportion 4
+    ["Code:1", 20]   # fixed width
 ]
 
 body_def = [
@@ -125,13 +132,14 @@ body_def = [
     [ ezwx.Label ("Choices: "), 
       ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
       ezwx.Label ("  ComboBox: "), 
-      ezwx.Combo ([ 'apple','orange','grape'],"orange",handler=onCombo,key="combo") ],
+      ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo") ],
     [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=1,handler=onList,key="list"),
       ezwx.Text  (proportion=1,expand=True,multiline=True,key="text"), 
       ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),
-      True ],
-    [ None, 
-      ezwx.Button("Start", handler=onButton, key="button") ],
+      True ],  #Stretch Proportion is set to 1
+    [ None,    #Insert Spacer with proportion 1 
+      ezwx.Button("StartThread", handler=onThreadButton),
+      ezwx.Button("StartTimer", handler=onTimerButton, key="button") ],
 ]
 
 layout = {
@@ -144,6 +152,9 @@ layout = {
 ######################################################################
 # Main
 ######################################################################
+
+def threadTarget():
+    ezwx.runAfter(onThread)
 
 if __name__ == "__main__":
     window = ezwx.WxApp(u"ezwxApp", 600, 480)

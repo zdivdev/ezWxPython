@@ -1,6 +1,7 @@
 import os
 import sys
 import wx
+import wx.adv
 import wx.xrc
 
 from threading import Thread
@@ -165,7 +166,16 @@ class Button(Control):
         self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
-    
+
+class Calendar(Control):
+    def __init__(self,date=None,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
+        self.date = date
+    def create(self,parent):  
+        self.ctrl = wx.adv.CalendarCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, wx.DefaultPosition, wx.DefaultSize, wx.adv.TP_DEFAULT )
+        if self.key is not None:
+            registerCtrl( self.key, self )
+        
 class Choice(Control):
     def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,key=None):
         super().__init__(key,expand,proportion)
@@ -192,7 +202,16 @@ class Combo(Control):
         self.ctrl.Bind( wx.EVT_COMBOBOX, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
-         
+     
+class Date(Control):
+    def __init__(self,date=None,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
+        self.date = date
+    def create(self,parent):  
+        self.ctrl = wx.adv.DatePickerCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, wx.DefaultPosition, wx.DefaultSize, wx.adv.TP_DEFAULT )
+        if self.key is not None:
+            registerCtrl( self.key, self )
+            
 class Label(Control):
     def __init__(self,text="",expand=False,proportion=0,multiline=False,key=None):
         super().__init__(key,proportion)
@@ -240,6 +259,15 @@ class Text(Control):
             self.ctrl.AppendText( filename + '\n' )
             if self.multiline is False:
                 break
+            
+class Time(Control):
+    def __init__(self,date=None,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
+        self.date = date
+    def create(self,parent):  
+        self.ctrl = wx.adv.TimePickerCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, wx.DefaultPosition, wx.DefaultSize, wx.adv.TP_DEFAULT )
+        if self.key is not None:
+            registerCtrl( self.key, self )
             
 ######################################################################
 # Dialogs
@@ -396,9 +424,6 @@ class WxApp():
         self.statusbar.SetStatusWidths(widths)
             
     def makeToolBar(self, tool_def):  #icon, text, handler
-        '''
-        AddLabelTool(self, id, label, bitmap, bmpDisabled=wx.NullBitmap, kind=wx.ITEM_NORMAL, shortHelp="", longHelp="", clientData=None)
-        '''
         flags = wx.TB_FLAT|wx.TB_HORIZONTAL
         if len(tool_def[0]) == 3:
             flags |= wx.TB_TEXT

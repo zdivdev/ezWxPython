@@ -11,6 +11,8 @@ from threading import Thread
 
 ID_START = 1000
 CtrlTable = {}
+wxAppRun = True
+wxAppCloseHandler = None
 
 def getId():
     global ID_START
@@ -67,6 +69,32 @@ def getBitmap(data):
     bitmap = wx.Bitmap(image) # wx.BitmapFromImage for legacy wx
     return bitmap
     
+def threadHandle(handler,start=False,key=None):
+    #from threading import *        
+    import threading
+    thread = threading.Thread(target=handler)
+    if key is not None:
+        registerCtrl(key,thread)        
+    if start is True:
+        thread.start()
+        
+def threadStart(key):
+    thread = getCtrl(key)
+    if thread is not None:
+        thread.start()
+        
+def threadJoin(key):
+    thread = getCtrl(key)
+    if thread is not None:
+        thread.join()
+  
+def callAfter(handler):
+    wx.CallAfter(handler)
+   
+def isWxAppRun():
+    global wxAppRun    
+    return wxAppRun
+       
 ######################################################################
 # Layouts
 ######################################################################
@@ -263,42 +291,68 @@ def MessageYesNoCancel(title,message):
 ######################################################################
 # WxApp
 ######################################################################
+
+WxMainWindow = None
+
+def WxAppClose():
+    global WxMainWindow
+    WxMainWindow.frame.Close()
     
+def WxAppCloseEvent(event):
+    global wxAppRun
+    global wxAppCloseHandler
+    wxAppRun = False
+    if wxAppCloseHandler is not None:
+        if wxAppCloseHandler(event) == True:
+            event.Skip()
+    else:
+        event.Skip()
+            
 class WxApp():
     def __init__( self, title, width=800, height=600 ):
+        global WxMainWindow
+        WxMainWindow = self
         self.app = wx.PySimpleApp()
         self.frame = wx.Frame( parent=None, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.Size( width,height ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         self.frame.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize ) 
+        self.frame.Bind(wx.EVT_CLOSE, WxAppCloseEvent)
         registerCtrl( 'WxApp', self )
         
     def run(self):
         self.frame.Show()
         self.app.MainLoop()
     
+    def close(self):
+        self.frame.Close()
+        
     def Show(self):
         self.frame.Show()
         
     def closeHandle(self,handler):
-        self.frame.Bind(wx.EVT_CLOSE, handler)
+        global wxAppCloseHandler
+        wxAppCloseHandler = handler
      
     def idleHandle(self,handler):
         self.frame.Bind(wx.EVT_IDLE, handler)
 
-    def timerHandle(self,handler,interval=1000,key=None):
-        self.interval = interval
-        self.timer = wx.Timer(self.frame)
-        self.frame.Bind(wx.EVT_TIMER, handler, self.timer)
+    def timerHandle(self,handler,interval=1000,start=False,key=None):
+        timer = wx.Timer(self.frame)
+        self.frame.Bind(wx.EVT_TIMER, handler, timer)
         if key is not None:
-            registerCtrl(key,self.timer)
-                
-    def timerStart(interval=None):
-        if interval is not None:
-            self.interval = interval
-        self.timer.Start(self.interval)
+            registerCtrl(key,timer)
+        if start is True and interval > 0:
+            timer.Start(interval)
+            
+    def timerStart(key,interval):
+        timer = getWxTimer(key)
+        if timer is not None and interval > 0:
+            timer.Start(interval)
         
-    def timerStop():
-        self.timer.Stop()
-        
+    def timerStop(key):
+        timer = getWxTimer(key)
+        if timer is not None:
+            timer.Stop()
+            
     def makeMenu(self, value):
         menu = wx.Menu()
         for k, v in value.items():

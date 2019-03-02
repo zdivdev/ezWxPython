@@ -179,6 +179,7 @@ Generated Form.
 * Body (Client Area) generation from 2-dimentional list. (single VBox + multiple HBoxes)
 * Close Event Handler 
 * Idle Event Handler
+* Timer Event Handler
 * TextArea with Drag and Drop files
 
 ### Supported Controls
@@ -204,7 +205,6 @@ Generated Form.
 
 * More controls support
 * Container support
-* Timer event support
 * Thread interface
 * Command shell interface
 * Network interface support : ssh, sftp, ftp, telnet and etc

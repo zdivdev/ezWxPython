@@ -35,6 +35,17 @@ def getWxCtrl(name):
     else:
         return None
     
+def getWxTimer(name):
+    return getCtrl(name)
+    
+def getWxAppCtrl():
+    global CtrlTable
+    name = 'WxApp'
+    if name in CtrlTable:
+        return CtrlTable[name].ctrl
+    else:
+        return None
+    
 def encodeIcon(filename):
     from zlib import compress
     from base64 import b64encode
@@ -91,16 +102,16 @@ class FileDrop(wx.FileDropTarget):
         return True
     
 class Control():
-    def __init__(self,name,expand=False,proportion=0,border=2):
+    def __init__(self,key=None,expand=False,proportion=0,border=2):
         self.ctrl = None
-        self.name = name
+        self.key = key
         self.expand = expand
         self.proportion = proportion    
         self.border=2
 
 class Bitmap(Control):
-    def __init__(self,name,filename=None,bitmap=None,expand=False,proportion=0):
-        super().__init__(name,expand,proportion)
+    def __init__(self,filename=None,bitmap=None,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
         self.bitmap = bitmap
         self.filename = filename
     def create(self,parent):
@@ -109,50 +120,54 @@ class Bitmap(Control):
             self.bitmap = wx.Bitmap( self.filename, wx.BITMAP_TYPE_ANY )
         self.ctrl = wx.StaticBitmap( parent, wx.ID_ANY, self.bitmap, wx.DefaultPosition, wx.DefaultSize, 0|flags )
         self.ctrl.Bind( wx.EVT_SIZE, self.onEvtBitmapSize )
-        registerCtrl( self.name, self )
+        if self.key is not None:
+            registerCtrl( self.key, self )
     def onEvtBitmapSize(self,event):
         #print("onEvtBitmapSize()",event.GetSize()) #(width, height)
         event.Skip()
 
 class Button(Control):
-    def __init__(self,name,label="",handler=None,expand=False,proportion=0):
-        super().__init__(name,expand,proportion)
+    def __init__(self,label="",handler=None,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
         self.label = label
         self.handler = handler
     def create(self,parent):        
         id = getId()
         self.ctrl = wx.Button( parent, id, self.label, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
-        registerCtrl( self.name, self )
+        if self.key is not None:
+            registerCtrl( self.key, self )
     
 class Choice(Control):
-    def __init__(self,name,select=0,choices=[],handler=None,expand=False,proportion=0):
-        super().__init__(name,expand,proportion)
-        self.select = select
+    def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
         self.choices = choices
+        self.select = select
         self.handler = handler
     def create(self,parent):        
         id = getId()
         self.ctrl = wx.Choice( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
         self.ctrl.SetSelection(self.select)
         self.ctrl.Bind( wx.EVT_CHOICE, self.handler, id=id )
-        registerCtrl( self.name, self )
+        if self.key is not None:
+            registerCtrl( self.key, self )
 
 class Combo(Control):
-    def __init__(self,name,value="",choices=[],handler=None,expand=False,proportion=0):
-        super().__init__(name,expand,proportion)
-        self.value = value
+    def __init__(self,choices=[],value="",handler=None,expand=False,proportion=0, key=None):
+        super().__init__(key,expand,proportion)
         self.choices = choices
+        self.value = value
         self.handler = handler
     def create(self,parent):        
         id = getId()
         self.ctrl = wx.ComboBox( parent, id, self.value, wx.DefaultPosition, wx.DefaultSize, self.choices, 0 )
         self.ctrl.Bind( wx.EVT_COMBOBOX, self.handler, id=id )
-        registerCtrl( self.name, self )
+        if self.key is not None:
+            registerCtrl( self.key, self )
          
 class Label(Control):
-    def __init__(self,name,text="",expand=False,proportion=0,multiline=False):
-        super().__init__(name,proportion)
+    def __init__(self,text="",expand=False,proportion=0,multiline=False,key=None):
+        super().__init__(key,proportion)
         self.text = text
         self.multiline = multiline
     def create(self,parent):
@@ -160,25 +175,26 @@ class Label(Control):
         if self.multiline == True:
             flags |= wx.TE_MULTILINE
         self.ctrl = wx.StaticText( parent, wx.ID_ANY, self.text, wx.DefaultPosition, wx.DefaultSize, 0|flags )
-        registerCtrl( self.name, self )
+        if self.key is not None:
+            registerCtrl( self.key, self )
     
-
 class List(Control):
-    def __init__(self,name,select=0,choices=[],handler=None,expand=False,proportion=0):
-        super().__init__(name,expand,proportion)
-        self.select = select
+    def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
         self.choices = choices
+        self.select = select
         self.handler = handler
     def create(self,parent):        
         id = getId()
         self.ctrl = wx.ListBox( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
         self.ctrl.SetSelection(self.select)
         self.ctrl.Bind( wx.EVT_LISTBOX, self.handler, id=id )
-        registerCtrl( self.name, self )
+        if self.key is not None:
+            registerCtrl( self.key, self )
     
 class Text(Control):
-    def __init__(self,name,text="",expand=False,proportion=0,multiline=False):
-        super().__init__(name,expand,proportion)
+    def __init__(self,text="",expand=False,proportion=0,multiline=False,key=None):
+        super().__init__(key,expand,proportion)
         self.text = text
         self.multiline = multiline
         self.expand = True if multiline == True else False
@@ -189,7 +205,8 @@ class Text(Control):
         self.ctrl = wx.TextCtrl( parent, wx.ID_ANY, self.text, wx.DefaultPosition, wx.DefaultSize, 0|flags )
         drop_target = FileDrop(self)
         self.ctrl.SetDropTarget(drop_target)
-        registerCtrl( self.name, self )
+        if self.key is not None:
+            registerCtrl( self.key, self )
     def drop_handle(self,filenames):
         for filename in filenames:
             self.ctrl.AppendText( filename + '\n' )
@@ -251,7 +268,8 @@ class WxApp():
     def __init__( self, title, width=800, height=600 ):
         self.app = wx.PySimpleApp()
         self.frame = wx.Frame( parent=None, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.Size( width,height ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
-        self.frame.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )  
+        self.frame.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize ) 
+        registerCtrl( 'WxApp', self )
         
     def run(self):
         self.frame.Show()
@@ -259,13 +277,27 @@ class WxApp():
     
     def Show(self):
         self.frame.Show()
-    
         
     def closeHandle(self,handler):
         self.frame.Bind(wx.EVT_CLOSE, handler)
      
     def idleHandle(self,handler):
         self.frame.Bind(wx.EVT_IDLE, handler)
+
+    def timerHandle(self,handler,interval=1000,key=None):
+        self.interval = interval
+        self.timer = wx.Timer(self.frame)
+        self.frame.Bind(wx.EVT_TIMER, handler, self.timer)
+        if key is not None:
+            registerCtrl(key,self.timer)
+                
+    def timerStart(interval=None):
+        if interval is not None:
+            self.interval = interval
+        self.timer.Start(self.interval)
+        
+    def timerStop():
+        self.timer.Stop()
         
     def makeMenu(self, value):
         menu = wx.Menu()

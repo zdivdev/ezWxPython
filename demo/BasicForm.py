@@ -63,7 +63,7 @@ def onFileBrowse(event):
             AppendToText(file)    
     else:
         AppendToText(files) 
-            
+
 def onCalendarButton(event):
     ctrl = ezwx.getWxCtrl('calendar') 
     date = ctrl.GetDate()
@@ -105,6 +105,25 @@ def onList(event):
     ctrl = ezwx.getWxCtrl('list')
     AppendToText(str(ctrl.GetSelection()) + " " + ctrl.GetStringSelection())
     
+
+######################################################################
+# Popup
+######################################################################
+
+popup_body_def = [
+    [ ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),      
+      1 ],
+]
+
+popup_layout = {
+    "body"   : popup_body_def, 
+}
+
+def onImageViewButton(event):
+    window = ezwx.WxPopup(u"ezwxApp", 600, 480)
+    window.makeLayout(popup_layout)
+    window.Show()
+
 ######################################################################
 # Layout
 ######################################################################
@@ -159,6 +178,7 @@ body_def = [
       ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),      
       1 ],
     [ None,    #Insert Spacer with proportion 1 
+      ezwx.Button("ImageView", handler=onImageViewButton),
       ezwx.Button("Calendar", handler=onCalendarButton),
       ezwx.Button("Date", handler=onDateButton),
       ezwx.Button("Time", handler=onTimeButton),

@@ -90,9 +90,6 @@ def threadTarget():
 if __name__ == "__main__":
     window = ezwx.WxApp(u"ezwxApp", 600, 480)
     window.makeLayout(layout)
-    window.closeHandle(onClose)
-    window.idleHandle(onIdle)
-    window.timerHandle(onTimer, key='timer')
     window.run()
 ```
 

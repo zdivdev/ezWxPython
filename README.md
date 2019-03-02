@@ -103,12 +103,12 @@ save_png="eJyVVH1MG2UYPyhjjJWvhOgkQY5Dp9nW3l2/e6Urd70eNK4dKSXUMEOP9kpvbe9ud1daiB
 menu_def = { 
     "File" : { 
         "Option" : { 
-            "Settings" : None, 
+            "Settings" : None,        # Disabled menu item
             "Copy": onCopy 
         }, 
-        "-" : None, 
-        "Exit" : [onExit, exit_png],
-        "-2" : None, 
+        "-" : None,                   # Menu separator
+        "Exit" : [onExit, exit_png],  # Menu item with base64-encoded icon image
+        "-2" : None,                  # Menu separator (should have different name from other menu separator)
     }, 
     "Help" : { 
         "About" : onAbout 
@@ -117,14 +117,14 @@ menu_def = {
 
 tool_def = [ #icon, text, handler
     [exit_png, onExit, "Exit" ],
-    [None],
-    [save_png, None, "Save", ],
+    [None],                         # Tool separator
+    [save_png, None, "Save", ],     # Disabled toolbar item
 ]
 
 status_def = [
-    ["Ready", -6],
-    ["Status", -4],
-    ["Code:1", 20]
+    ["Ready", -6],   # width will have space with proportion 6 
+    ["Status", -4],  # width will have space with proportion 4
+    ["Code:1", 20]   # fixed width
 ]
 
 body_def = [
@@ -135,12 +135,12 @@ body_def = [
     [ ezwx.Label ("Choices: "), 
       ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
       ezwx.Label ("  ComboBox: "), 
-      ezwx.Combo ([ 'apple','orange','grape'],"orange",handler=onCombo,key="combo") ],
+      ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo") ],
     [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=1,handler=onList,key="list"),
       ezwx.Text  (proportion=1,expand=True,multiline=True,key="text"), 
       ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),
-      True ],
-    [ None, 
+      True ],  #Stretch Proportion is set to 1
+    [ None,    #Insert Spacer with proportion 1
       ezwx.Button("Start", handler=onButton, key="button") ],
 ]
 

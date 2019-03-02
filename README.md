@@ -10,6 +10,7 @@ Since the ordered dict used in menubar generation is supported from python 3.6, 
 ```python
 import os
 import sys
+import time
 import ezWxPython as ezwx
 
 ######################################################################
@@ -22,6 +23,24 @@ def onExit(event):
     if rv is True:
         sys.exit()
 
+def onClose(event):
+    rv = ezwx.MessageYesNoCancel("Alert", "Do you want to quit ?" )
+    print(rv)
+    if rv is True:
+        sys.exit()
+        
+idle_time = 0
+idle_count = 0
+def onIdle(event):
+    global idle_time
+    global idle_count
+    curr_time = int(time.time())
+    idle_count += 1
+    if idle_time != curr_time:
+        print(idle_time, idle_count)
+        idle_time = curr_time
+        idle_count = 0
+    
 def onAbout(event):
     ezwx.MessageBox("About", "eezWxPython Demo\nzdiv")
     
@@ -30,13 +49,13 @@ def onCopy(event):
     
 def onBrowse(event):
     folder = ezwx.DirectoryDialog()
-    text = ezwx.getCtrl('folder')
+    text = ezwx.getWxCtrl('folder')
     if text is not None:
         text.write(folder)    
     
 def onFileBrowse(event):
     files = ezwx.OpenFileDialog()
-    text = ezwx.getCtrl('text')
+    text = ezwx.getWxCtrl('text')
     if text is not None:
         if type(files) is list:
             for file in files:
@@ -45,22 +64,22 @@ def onFileBrowse(event):
             text.write(files + "\n") 
             
 def onTextAdd(event):
-    text = ezwx.getCtrl('text')
+    text = ezwx.getWxCtrl('text')
     if text is not None:
         text.write("Text Append \n")
       
 def onChoice(event):
-    ctrl = ezwx.getCtrl('choice')
+    ctrl = ezwx.getWxCtrl('choice')
     print(ctrl.GetSelection(), ctrl.GetStringSelection())
     print(event)
         
 def onCombo(event):
-    ctrl = ezwx.getCtrl('combo')
+    ctrl = ezwx.getWxCtrl('combo')
     print(ctrl.GetSelection(), ctrl.GetStringSelection())
     print(event)
         
 def onList(event):
-    ctrl = ezwx.getCtrl('list')
+    ctrl = ezwx.getWxCtrl('list')
     print(ctrl.GetSelection(), ctrl.GetStringSelection())
     print(event)
     
@@ -128,6 +147,8 @@ layout = {
 if __name__ == "__main__":
     window = ezwx.WxApp(u"ezwxApp", 600, 480)
     window.makeLayout(layout)
+    window.closeHandle(onClose)
+    window.idleHandle(onIdle)
     window.run()
 ```
 

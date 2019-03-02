@@ -7,6 +7,11 @@ import ezWxPython as ezwx
 # Handler
 ######################################################################
 
+def AppendToText(text):
+    ctrl = ezwx.getWxCtrl('text')
+    if ctrl is not None:
+        ctrl.write( text + "\n" )
+        
 def onExit(event):
     ezwx.WxAppClose()
     
@@ -27,15 +32,11 @@ def onIdle(event):
         idle_count = 0
 
 def onTimer(event):
-    text = ezwx.getWxCtrl('text')
-    if text is not None:
-        text.write('[Timer]' + time.ctime() + "\n")
+    AppendToText('[Timer] ' + time.ctime())
     
 def onThreadAction():
-    text = ezwx.getWxCtrl('text')
-    if text is not None:
-        text.write('[Thread' + time.ctime() + "\n")
-    
+    AppendToText('[Thread] ' + time.ctime())
+
 def onThread():
     from time import sleep
     while ezwx.isWxAppRun():
@@ -52,18 +53,32 @@ def onBrowse(event):
     folder = ezwx.DirectoryDialog()
     text = ezwx.getWxCtrl('folder')
     if text is not None:
+        text.Clear()
         text.write(folder)    
     
 def onFileBrowse(event):
     files = ezwx.OpenFileDialog()
-    text = ezwx.getWxCtrl('text')
-    if text is not None:
-        if type(files) is list:
-            for file in files:
-                text.write(file + "\n")    
-        else:
-            text.write(files + "\n") 
+    if type(files) is list:
+        for file in files:
+            AppendToText(file)    
+    else:
+        AppendToText(files) 
             
+def onCalendarButton(event):
+    ctrl = ezwx.getWxCtrl('calendar') 
+    date = ctrl.GetDate()
+    AppendToText(date.Format('%Y-%m-%d')) 
+
+def onDateButton(event):
+    ctrl = ezwx.getWxCtrl('date') 
+    date = ctrl.GetValue()
+    AppendToText(date.Format('%Y-%m-%d')) 
+
+def onTimeButton(event):
+    ctrl = ezwx.getWxCtrl('time') 
+    h, m, s = ctrl.GetTime()
+    AppendToText('%04d:%02d:%02d' % (h,m,s)) 
+
 def onThreadButton(event):
     ezwx.threadHandle(onThread, key='thread')    
     ezwx.threadStart('thread')
@@ -80,15 +95,15 @@ def onTimerButton(event):
       
 def onChoice(event):
     ctrl = ezwx.getWxCtrl('choice')
-    print(ctrl.GetSelection(), ctrl.GetStringSelection())
+    AppendToText(str(ctrl.GetSelection()) + " " + ctrl.GetStringSelection())
         
 def onCombo(event):
     ctrl = ezwx.getWxCtrl('combo')
-    print(ctrl.GetSelection(), ctrl.GetStringSelection())
+    AppendToText(str(ctrl.GetSelection()) + " " + ctrl.GetStringSelection())
         
 def onList(event):
     ctrl = ezwx.getWxCtrl('list')
-    print(ctrl.GetSelection(), ctrl.GetStringSelection())
+    AppendToText(str(ctrl.GetSelection()) + " " + ctrl.GetStringSelection())
     
 ######################################################################
 # Layout
@@ -132,12 +147,21 @@ body_def = [
     [ ezwx.Label ("Choices: "), 
       ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
       ezwx.Label ("  ComboBox: "), 
-      ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo") ],
+      ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo"),
+      ezwx.Label ("  Date: "), 
+      ezwx.Date  (key='date'),
+      ezwx.Label ("  Time: "), 
+      ezwx.Time  (key='time'), ],
     [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=1,handler=onList,key="list"),
-      ezwx.Text  (proportion=1,expand=True,multiline=True,key="text"), 
-      ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),
-      True ],  #Stretch Proportion is set to 1
+      ezwx.Text  ("Default\nMulti Line\nText",proportion=1,expand=True,multiline=True,key="text"), 
+      1 ],  #Stretch Proportion is set to 1
+    [ ezwx.Calendar(key='calendar',expand=True,proportion=1),
+      ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),      
+      1 ],
     [ None,    #Insert Spacer with proportion 1 
+      ezwx.Button("Calendar", handler=onCalendarButton),
+      ezwx.Button("Date", handler=onDateButton),
+      ezwx.Button("Time", handler=onTimeButton),
       ezwx.Button("StartThread", handler=onThreadButton),
       ezwx.Button("StartTimer", handler=onTimerButton, key="button") ],
 ]

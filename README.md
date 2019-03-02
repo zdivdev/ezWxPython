@@ -134,6 +134,7 @@ Generated Form.
 * MessageBox 
 * MessageYesNo : True, False
 * MessageYesNoCancel : True, False, None
+* Custom Popup Window : WxPopup 
 
 ## Todo
 

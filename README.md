@@ -180,6 +180,7 @@ Generated Form.
 * Close Event Handler 
 * Idle Event Handler
 * Timer Event Handler
+* Thread interface : callLater(), WxAppClose()
 * TextArea with Drag and Drop files
 
 ### Supported Controls
@@ -205,7 +206,6 @@ Generated Form.
 
 * More controls support
 * Container support
-* Thread interface
 * Command shell interface
 * Network interface support : ssh, sftp, ftp, telnet and etc
 * 3rd party library support : matplotlib, PIL, FPDF and etc.

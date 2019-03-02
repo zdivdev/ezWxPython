@@ -28,6 +28,13 @@ def getCtrl(name):
     else:
         return None
 
+def getWxCtrl(name):
+    global CtrlTable
+    if name in CtrlTable:
+        return CtrlTable[name].ctrl
+    else:
+        return None
+    
 def encodeIcon(filename):
     from zlib import compress
     from base64 import b64encode
@@ -102,7 +109,7 @@ class Bitmap(Control):
             self.bitmap = wx.Bitmap( self.filename, wx.BITMAP_TYPE_ANY )
         self.ctrl = wx.StaticBitmap( parent, wx.ID_ANY, self.bitmap, wx.DefaultPosition, wx.DefaultSize, 0|flags )
         self.ctrl.Bind( wx.EVT_SIZE, self.onEvtBitmapSize )
-        registerCtrl( self.name, self.ctrl )
+        registerCtrl( self.name, self )
     def onEvtBitmapSize(self,event):
         #print("onEvtBitmapSize()",event.GetSize()) #(width, height)
         event.Skip()
@@ -116,7 +123,7 @@ class Button(Control):
         id = getId()
         self.ctrl = wx.Button( parent, id, self.label, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
-        registerCtrl( self.name, self.ctrl )
+        registerCtrl( self.name, self )
     
 class Choice(Control):
     def __init__(self,name,select=0,choices=[],handler=None,expand=False,proportion=0):
@@ -129,7 +136,7 @@ class Choice(Control):
         self.ctrl = wx.Choice( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
         self.ctrl.SetSelection(self.select)
         self.ctrl.Bind( wx.EVT_CHOICE, self.handler, id=id )
-        registerCtrl( self.name, self.ctrl )
+        registerCtrl( self.name, self )
 
 class Combo(Control):
     def __init__(self,name,value="",choices=[],handler=None,expand=False,proportion=0):
@@ -141,7 +148,7 @@ class Combo(Control):
         id = getId()
         self.ctrl = wx.ComboBox( parent, id, self.value, wx.DefaultPosition, wx.DefaultSize, self.choices, 0 )
         self.ctrl.Bind( wx.EVT_COMBOBOX, self.handler, id=id )
-        registerCtrl( self.name, self.ctrl )
+        registerCtrl( self.name, self )
          
 class Label(Control):
     def __init__(self,name,text="",expand=False,proportion=0,multiline=False):
@@ -153,7 +160,7 @@ class Label(Control):
         if self.multiline == True:
             flags |= wx.TE_MULTILINE
         self.ctrl = wx.StaticText( parent, wx.ID_ANY, self.text, wx.DefaultPosition, wx.DefaultSize, 0|flags )
-        registerCtrl( self.name, self.ctrl )
+        registerCtrl( self.name, self )
     
 
 class List(Control):
@@ -166,8 +173,8 @@ class List(Control):
         id = getId()
         self.ctrl = wx.ListBox( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
         self.ctrl.SetSelection(self.select)
-        self.ctrl.Bind( wx.EVT_CHOICE, self.handler, id=id )
-        registerCtrl( self.name, self.ctrl )
+        self.ctrl.Bind( wx.EVT_LISTBOX, self.handler, id=id )
+        registerCtrl( self.name, self )
     
 class Text(Control):
     def __init__(self,name,text="",expand=False,proportion=0,multiline=False):
@@ -182,7 +189,7 @@ class Text(Control):
         self.ctrl = wx.TextCtrl( parent, wx.ID_ANY, self.text, wx.DefaultPosition, wx.DefaultSize, 0|flags )
         drop_target = FileDrop(self)
         self.ctrl.SetDropTarget(drop_target)
-        registerCtrl( self.name, self.ctrl )
+        registerCtrl( self.name, self )
     def drop_handle(self,filenames):
         for filename in filenames:
             self.ctrl.AppendText( filename + '\n' )

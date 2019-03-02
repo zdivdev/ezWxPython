@@ -30,6 +30,11 @@ def onIdle(event):
         print(idle_time, idle_count)
         idle_time = curr_time
         idle_count = 0
+
+def onTimer(event):
+    text = ezwx.getWxCtrl('text')
+    if text is not None:
+        text.write(time.ctime() + "\n")
     
 def onAbout(event):
     ezwx.MessageBox("About", "eezWxPython Demo\nzdiv")
@@ -53,10 +58,15 @@ def onFileBrowse(event):
         else:
             text.write(files + "\n") 
             
-def onTextAdd(event):
-    text = ezwx.getWxCtrl('text')
-    if text is not None:
-        text.write("Text Append \n")
+def onButton(event):
+    timer = ezwx.getWxTimer('timer')
+    button = ezwx.getWxCtrl('button')
+    if button.GetLabel() == 'Start':
+        button.SetLabel('Stop')
+        timer.Start(1000)
+    else:
+        button.SetLabel('Start')
+        timer.Stop()
       
 def onChoice(event):
     ctrl = ezwx.getWxCtrl('choice')
@@ -108,19 +118,20 @@ status_def = [
 ]
 
 body_def = [
-    [ ezwx.Label("","Folder: "), 
-      ezwx.Text("folder",proportion=1), 
-      ezwx.Button("browse", "Folder", handler=onBrowse),
-      ezwx.Button("file_browse", "Files", handler=onFileBrowse)],
-    [ ezwx.Label("","Choices: "), 
-      ezwx.Choice("choice",0,['apple','orange','grape'],handler=onChoice),
-      ezwx.Label("","  ComboBox: "), 
-      ezwx.Combo("combo","orange", [ 'apple','orange','grape'],handler=onCombo) ],
-    [ ezwx.List("list",2,['apple','orange','grape'],expand=True,proportion=1,handler=onList),
-      ezwx.Text("text",proportion=1,expand=True,multiline=True), 
-      ezwx.Bitmap("bitmap",filename="D:\\Lenna.png",expand=True,proportion=1),
+    [ ezwx.Label ("Folder: "), 
+      ezwx.Text  ("Default Text",key="folder",proportion=1), 
+      ezwx.Button("Folder", handler=onBrowse, key="browse"),
+      ezwx.Button("Files", handler=onFileBrowse, key="file_browse" )],
+    [ ezwx.Label ("Choices: "), 
+      ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
+      ezwx.Label ("  ComboBox: "), 
+      ezwx.Combo ([ 'apple','orange','grape'],"orange",handler=onCombo,key="combo") ],
+    [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=1,handler=onList,key="list"),
+      ezwx.Text  (proportion=1,expand=True,multiline=True,key="text"), 
+      ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),
       True ],
-    [ None, ezwx.Button("text_add", "Text Add", handler=onTextAdd) ],
+    [ None, 
+      ezwx.Button("Start", handler=onButton, key="button") ],
 ]
 
 layout = {
@@ -139,4 +150,5 @@ if __name__ == "__main__":
     window.makeLayout(layout)
     window.closeHandle(onClose)
     window.idleHandle(onIdle)
+    window.timerHandle(onTimer, key='timer')
     window.run()

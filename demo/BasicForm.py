@@ -39,13 +39,13 @@ def onCopy(event):
     
 def onBrowse(event):
     folder = ezwx.DirectoryDialog()
-    text = ezwx.getCtrl('folder')
+    text = ezwx.getWxCtrl('folder')
     if text is not None:
         text.write(folder)    
     
 def onFileBrowse(event):
     files = ezwx.OpenFileDialog()
-    text = ezwx.getCtrl('text')
+    text = ezwx.getWxCtrl('text')
     if text is not None:
         if type(files) is list:
             for file in files:
@@ -54,22 +54,22 @@ def onFileBrowse(event):
             text.write(files + "\n") 
             
 def onTextAdd(event):
-    text = ezwx.getCtrl('text')
+    text = ezwx.getWxCtrl('text')
     if text is not None:
         text.write("Text Append \n")
       
 def onChoice(event):
-    ctrl = ezwx.getCtrl('choice')
+    ctrl = ezwx.getWxCtrl('choice')
     print(ctrl.GetSelection(), ctrl.GetStringSelection())
     print(event)
         
 def onCombo(event):
-    ctrl = ezwx.getCtrl('combo')
+    ctrl = ezwx.getWxCtrl('combo')
     print(ctrl.GetSelection(), ctrl.GetStringSelection())
     print(event)
         
 def onList(event):
-    ctrl = ezwx.getCtrl('list')
+    ctrl = ezwx.getWxCtrl('list')
     print(ctrl.GetSelection(), ctrl.GetStringSelection())
     print(event)
     

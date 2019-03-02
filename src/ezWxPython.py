@@ -337,15 +337,19 @@ def WxAppCloseEvent(event):
         event.Skip()
             
 class WxApp():
-    def __init__( self, title, width=800, height=600 ):
+    def __init__( self, title, width=800, height=600, popup=False ):
         global WxMainWindow
-        WxMainWindow = self
-        self.app = wx.PySimpleApp()
-        self.frame = wx.Frame( parent=None, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.Size( width,height ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
-        self.frame.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize ) 
-        self.frame.Bind(wx.EVT_CLOSE, WxAppCloseEvent)
-        registerCtrl( 'WxApp', self )
-        
+        if popup is False:
+            WxMainWindow = self
+            self.app = wx.PySimpleApp()
+            self.frame = wx.Frame( parent=None, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.Size( width,height ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+            self.frame.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize ) 
+            self.frame.Bind(wx.EVT_CLOSE, WxAppCloseEvent)
+            registerCtrl( 'WxApp', self )
+        else:
+            self.frame = wx.Frame( parent=None, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.Size( width,height ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+            self.frame.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize ) 
+            
     def run(self):
         self.frame.Show()
         self.app.MainLoop()
@@ -497,3 +501,8 @@ class WxApp():
             self.makeStatusBar(layout['status'])
         if 'body' in layout:
             self.makeBody(layout['body'])
+
+class WxPopup(WxApp):
+    def __init__( self, title, width=800, height=600 ):
+        super().__init__( title, width=width, height=height, popup=True )
+        

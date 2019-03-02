@@ -10,6 +10,8 @@ Since the ordered dict used in menubar generation is supported from python 3.6, 
 Full source : /demo/BasicForm.py 
 
 ```python
+import ezWxPython as ezwx
+
 ######################################################################
 # Layout
 ######################################################################

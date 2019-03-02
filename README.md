@@ -111,6 +111,7 @@ Generated Form.
 * Timer Event Handler
 * Thread interface : callLater(), WxAppClose()
 * TextArea with Drag and Drop files
+* Support Popup window which can be created same way as main window.
 
 ### Supported Controls
 

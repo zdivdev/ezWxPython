@@ -173,6 +173,7 @@ body_def = [
       ezwx.Time  (key='time'), ],
     [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=1,handler=onList,key="list"),
       ezwx.Text  ("Default\nMulti Line\nText",proportion=1,expand=True,multiline=True,key="text"), 
+      ezwx.StyledText  ("Default\nMulti Line\nText",proportion=1,key="text"), 
       1 ],  #Stretch Proportion is set to 1
     [ ezwx.Calendar(key='calendar',expand=True,proportion=1),
       ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),      

@@ -123,6 +123,7 @@ Generated Form.
 * Date : DatePickerCtrl
 * Label : StaticText
 * List : ListBox
+* StyledText : StyledTextCtrl
 * Text : TextArea + drag and drop files
 * Time : TimePickerCtrl
 

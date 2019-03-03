@@ -1,6 +1,7 @@
 import os
 import sys
 import wx
+import wx.stc
 import wx.adv
 import wx.xrc
 
@@ -238,7 +239,35 @@ class List(Control):
         self.ctrl.Bind( wx.EVT_LISTBOX, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
-    
+
+class StyledText(Control):
+    def __init__(self,text="",expand=True,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
+        self.text = text
+    def create(self,parent):
+        flags = 0
+        self.ctrl = wx.stc.StyledTextCtrl( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0|flags )
+        self.enableLineNumber()
+        self.ctrl.SetText(self.text)
+        drop_target = FileDrop(self)
+        self.ctrl.SetDropTarget(drop_target)
+        if self.key is not None:
+            registerCtrl( self.key, self )
+    def drop_handle(self,filenames):
+        for filename in filenames:
+            self.ctrl.AppendText( filename + '\n' )
+            if self.multiline is False:
+                break
+    def enableLineNumber(self):
+        #self.stc.SetProperty("fold", "1")
+        #self.stc.SetProperty("fold.html", "1")
+        self.ctrl.SetMargins(0, 0)
+        self.ctrl.SetMarginType(1, wx.stc.STC_MARGIN_NUMBER)
+        self.ctrl.SetMarginMask(2, wx.stc.STC_MASK_FOLDERS)
+        self.ctrl.SetMarginSensitive(2, True)
+        self.ctrl.SetMarginWidth(1, 32) # 2,25
+        self.ctrl.SetMarginWidth(2, 16) # 2,25
+        
 class Text(Control):
     def __init__(self,text="",expand=False,proportion=0,multiline=False,key=None):
         super().__init__(key,expand,proportion)
@@ -505,4 +534,3 @@ class WxApp():
 class WxPopup(WxApp):
     def __init__( self, title, width=800, height=600 ):
         super().__init__( title, width=width, height=height, popup=True )
-        

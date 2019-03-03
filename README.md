@@ -100,7 +100,7 @@ Generated Form.
 
 ## Status
 
-### features.
+### Implemented features.
 
 * Menubar generation from dict with text menu items + optional icon.
 * Toolbar generation from list with icon buttons + optional text.
@@ -113,7 +113,7 @@ Generated Form.
 * TextArea with Drag and Drop files
 * Support Popup window which can be created same way as main window.
 
-### Supported Controls
+### Implemented Controls
 
 * Bitmap : StaticBitmap
 * Button
@@ -126,7 +126,7 @@ Generated Form.
 * Text : TextArea + drag and drop files
 * Time : TimePickerCtrl
 
-### Supported Dialogs
+### Implemented Dialogs
 
 * Directory Choose Dialog
 * Open File Dialog with multiple file selection support (return full path)

@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
 Generated Form.
 
-![basic_form](https://2.bp.blogspot.com/-EoJXFaJPSgk/XHvIiv3PThI/AAAAAAAAAhc/A-FBspSWHM0sGQgr4UCfW3_8J-3B3kd8ACLcBGAs/s1600/win4.png)   
+![basic_form](https://2.bp.blogspot.com/-7pPs0CLrC9A/XH0KlGyD9jI/AAAAAAAAAho/QT-89759XQYnI8Rv9ZuwBTKa0A7G2lACQCLcBGAs/s1600/win5.png)   
 
 
 ## Status
@@ -116,17 +116,23 @@ Generated Form.
 
 ### Implemented Controls
 
-* Bitmap : StaticBitmap
-* Button
-* Calendar : CalendarCtrl
-* Choice : ChoiceBox
-* Combo : ComboBox
-* Date : DatePickerCtrl
-* Label : StaticText
-* List : ListBox
-* StyledText : StyledTextCtrl
-* Text : TextArea + drag and drop files
-* Time : TimePickerCtrl
+* Bitmap : wx.StaticBitmap
+* Button : wx.Button
+* Calendar : wx.CalendarCtrl
+* Choice : wx.ChoiceBox
+* Combo : wx.ComboBox
+* Date : wx.DatePickerCtrl
+* Label : wx.StaticText
+* List : wx.ListBox
+* StyledText : wx.StyledTextCtrl
+* Text : wx.TextArea + drag and drop files
+* Time : wx.TimePickerCtrl
+
+### Implemented Containers
+
+* Panel : wx.Panel
+* Splitter : wx.SplitterWindow
+* Notebook : wx.Notebook
 
 ### Implemented Dialogs
 
@@ -141,7 +147,7 @@ Generated Form.
 ## Todo
 
 * More controls support
-* Container support
+* More Containers and Sivers support
 * Command shell interface
 * Network interface support : ssh, sftp, ftp, telnet and etc
 * 3rd party library support : matplotlib, PIL, FPDF and etc.

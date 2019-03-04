@@ -560,13 +560,6 @@ class WxApp():
         self.toolbar.Realize()
 
     def makeBody(self,body_def):
-        '''
-        self.sizer = wx.BoxSizer()
-        self.panel = Panel(body_def,self.frame,create=True)
-        self.sizer.Add( self.panel.ctrl, 1, wx.EXPAND, 0 )
-        self.sizer.Fit( self.panel.ctrl )
-        self.frame.SetSizer( self.sizer )
-        '''
         self.panel = Panel(body_def,self.frame,create=True)
         self.frame.SetSizer( wrapSizer(self.panel.ctrl) )
         self.frame.Layout()          

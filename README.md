@@ -13,7 +13,7 @@ Full source : /demo/BasicForm.py
 import ezWxPython as ezwx
 
 ######################################################################
-# Popup Window
+# Popup
 ######################################################################
 
 popup_body_def = [
@@ -31,7 +31,7 @@ def onImageViewButton(event):
     window.Show()
 
 ######################################################################
-# Main Layout
+# Layout
 ######################################################################
         
 exit_png='eJwBZgWZ+olQTkcNChoKAAAADUlIRFIAAAAgAAAAIAgGAAAAc3p69AAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAUISURBVHjavFfdaxxVFP/de/cj28221hpBTIlNX6qQ9EUNQg1RKKYsfRBfFIL2oeC70AdBfPBJqIr/QLHEKMWH+hFrsxQCarVfVNFEDNU0pGlTTGJTapO4M3Pv9Zw7dze7ss3OImaTk8nOzL3nN7/zOx8DbO5HTF/4srg690P0wZF+S98zqc1yfKn04a5HdnZ+KmF6RSoNJSSfz8tNcK7mfyp9sru7a3pt6bfeubPHYKIIQgi+lm7GQOqjNwY/y2VkUdICkdCjsRZBEKC7Zx+6HnsK4eot3Jj4DtHqMkDXjDVQKn72ZgBy2ZQovnVqjYJFABIiMMZi5e8Alw/tw7Wfx3F3aRZCkisya0JYTQzIZADaRIwCbXRnKwCsTeP69yNYKxtax27IIT05/cIQAOU3awZACCvA9DNgmRAAB0spBUuLjOCQwFEPG4dH67CiASTIAgtJ8WoFAH/4fnZGzxwDAHz86XwUuj0TARBGgu+V0iYHQPcRAUQ3h8K6h68AsJ6BSggapWHm4Huwzx3FSQYoNYdAEWWyZdMEwGjrNFFnTUSY1ySU/l14/q83sSLKyqFVxEBSEXKsJdFlbQMG6EeHodPVvRhIBxp4oe91PNuLobHCOSibpQUp2lS2YMrlu9OBN81HzgIqRKqGgXTxHSyGGtvcRUK7VqYjchjsfREldQK/L38DOzkAmQkJsk4iAacZ7fczLgEEOSdWSFORC8F6FuTZ+fFXj+FW+XOunLSQbrD3Y2L+BA70vgyZHsZ5+TXUL8/QxgHtbhKEwMYiNHEI2Hn3QzPo2DqPuWiw0gscgAw/+Z3yAr698sV6uRWj5BiY/GMYgz2HKG2O46IcR9vUAO0exV42AMBZoI1xT6+tcNQ/eN8ShkuPYqCoqwxUNbCi5ykYcCYyZHwkeJY2uvLnx3hizx5EnTfdSady2cxUjQh9LSCf+VwaJgycTqpZwFhW7Q2oLKoMWFNTUFIBLk1PITPf6WoCmD5hNy5EwhciW9GBcSxsyaYRUiHyEYgZ4E1DdRPZPMVjC5GQowuZ2FJtwOwicKHURfTvJwKotis4CpuZ9nlvybMlAAu3d+DAkz9SIYrqNMAA7h4dPtfOCFkwlCV45aU4ylevA5fHulC4uh8yG3jIsqkIlRJx57PC7UkqwNS1nTh9Po++p8t1zSg4dQT9dNzuo5EefBunmYVfp4HF8Q4Upkm1GcpNaZs7r4ZA1IXAoaLd2/OpuBn5XsB/V8hmyCbJJvh/VvDMHFA6ia8Glh6HzRrOzgTCWzcWmTE1qegtT609IhHW9gKqLrhNtuBtmQSMM6M4e/F9vKup8PB3qURrlZCewpj6SsiWSVGPoBhLee92HI6+hr3+/yiSsWJ5QeJmyIXINugFflxjBnIbNCMOySzfS1bQdHC0CosWehFpQLrarxsACHWw4TwQeHMzIS9WFANmTMAmHQcotipuxdrWrXL9hhgQqYQTEeewiz9EawxwA+IZ0P4LNjMQUh3ItzCSudLr+plNPBJxCOIuiPWRzI+GJipTWHPJAKRFRG8PirOwhfcCXhfrJpaSqILgg2OgRoSZoaGhcsONaOHYMqt6yX9LHgJtJc7MFLAjF6GzECKfMoiHY86CcnUicgPJyMjIbp4LGhHgz2f+6/vZA9tyucPFnoMPd7T3bS9gb6UbCr953jv7315O/f7tZFvJqOXhDlddgc37KP+wWQ+Gp5qVfwQYAOMRch38qZCKAAAAAElFTkSuQmCCWbl5kg=='
@@ -66,29 +66,37 @@ status_def = [
 
 body_def = [
     [ ezwx.Label ("Folder: "), 
-      ezwx.Text  ("Default Text",key="folder",proportion=1), 
+      ezwx.Text  ("Default Text",key="folder",expand=True,proportion=1), 
       ezwx.Button("Folder", handler=onBrowse, key="browse"),
-      ezwx.Button("Files", handler=onFileBrowse, key="file_browse" )],
-    [ ezwx.Label ("Choices: "), 
-      ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
-      ezwx.Label ("  ComboBox: "), 
-      ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo"),
-      ezwx.Label ("  Date: "), 
-      ezwx.Date  (key='date'),
-      ezwx.Label ("  Time: "), 
-      ezwx.Time  (key='time'), ],
-    [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=1,handler=onList,key="list"),
+      ezwx.Button("Files", handler=onFileBrowse, key="file_browse" ), ],
+    [ ezwx.Check("Check1", handler=onCheck, key='check1'),
+      ezwx.Check("Check2", key='check2'), ],
+    [ ezwx.Label ("Choices: "), ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
+      ezwx.Label ("  ComboBox: "), ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo"),
+      ezwx.Label ("  Date: "), ezwx.Date  (key='date'),
+      ezwx.Label ("  Time: "), ezwx.Time  (key='time'), ],
+    [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=0,handler=onList,key="list"),
+      ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=0,handler=onCheckList,check=True,key="checklist"),
+      ezwx.Scroll( [
+          [ezwx.Radio("Group",["Item1","item2","item3"],"item2",handler=onRadio,key='radio')],
+          [ezwx.Button("1")],[ezwx.Button("2")],[ezwx.Button("3")],[ezwx.Button("4")],
+          [ezwx.Button("5")],[ezwx.Button("6")],[ezwx.Button("7")],[ezwx.Button("8")],
+          [ezwx.Button("9")],[ezwx.Button("10")],
+      ], expand=True, proportion=1),
       ezwx.Notebook([
           [
               "StyledText",
-              [ ezwx.StyledText  ("Default\nMulti Line\nText",expand=True,proportion=1,key="stc"), True]
+              [ ezwx.StyledText ("Default\nMulti Line\nText",expand=True,proportion=1,key="stc"),
+                { 'expand' : True, 'proportion' : 1 } ],
           ],      
           [
               "Text",
-              [ ezwx.Text  ("Default\nMulti Line\nText",proportion=1,expand=True,multiline=True,key="text"), ]
+              [ ezwx.Text  ("Default\nMulti Line\nText",expand=True,proportion=1,multiline=True,key="text"), 
+                { 'expand' : True, 'proportion' : 1 } ],
           ],
-      ]),  #Stretch Proportion is set to 1
-      1, ],
+      ], expand=True, proportion=2, choice=False),  #Stretch Proportion is set to 1
+      { 'proportion' : 1 }
+    ],
     [ ezwx.Panel([
         [ ezwx.Button("A"), ezwx.Button("B")], 
         [ ezwx.Text("C", expand=True, proportion=1)]
@@ -100,11 +108,12 @@ body_def = [
           ], #panel1
           [
               [ ezwx.Calendar(key='calendar',expand=True,proportion=1)],
-          ]  #panel2
-      ]),
-      1 ],
+          ],  #panel2
+      ], expand=True, proportion=1),
+      { 'proportion' : 1 }
+    ],
     [ None,    #Insert Spacer with proportion 1 
-      ezwx.Button("ImageView", handler=onImageViewButton),  #Popup window 
+      ezwx.Button("ImageView", handler=onImageViewButton),
       ezwx.Button("Calendar", handler=onCalendarButton),
       ezwx.Button("Date", handler=onDateButton),
       ezwx.Button("Time", handler=onTimeButton),

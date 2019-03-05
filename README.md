@@ -160,20 +160,23 @@ Generated Form.
 * Bitmap : wx.StaticBitmap
 * Button : wx.Button
 * Calendar : wx.CalendarCtrl
+* Check : wx.CheckBox
 * Choice : wx.ChoiceBox
 * Combo : wx.ComboBox
 * Date : wx.DatePickerCtrl
 * Label : wx.StaticText
-* List : wx.ListBox
+* List : wx.ListBox, wx.CheckList
+* Radio : wx.RadioBox
 * StyledText : wx.StyledTextCtrl
 * Text : wx.TextArea + drag and drop files
 * Time : wx.TimePickerCtrl
 
 ### Implemented Containers
 
+* Notebook : wx.Notebook, wx.Choicebook
 * Panel : wx.Panel
 * Splitter : wx.SplitterWindow
-* Notebook : wx.Notebook
+* Scroll : wx.ScrollWindow
 
 ### Implemented Dialogs
 
@@ -188,7 +191,7 @@ Generated Form.
 ## Todo
 
 * More controls support
-* More Containers and Sivers support
+* More Containers and Sizers support
 * Command shell interface
 * Network interface support : ssh, sftp, ftp, telnet and etc
 * 3rd party library support : matplotlib, PIL, FPDF and etc.

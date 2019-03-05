@@ -174,7 +174,7 @@ Generated Form.
 * Combo : wx.ComboBox
 * Date : wx.DatePickerCtrl
 * Label : wx.StaticText
-* List : wx.ListBox, wx.CheckList
+* List : wx.ListBox, wx.CheckListBox
 * Radio : wx.RadioBox
 * StyledText : wx.StyledTextCtrl
 * Text : wx.TextArea + drag and drop files

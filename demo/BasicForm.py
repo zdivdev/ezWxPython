@@ -104,8 +104,20 @@ def onCombo(event):
 def onList(event):
     ctrl = ezwx.getWxCtrl('list')
     AppendToText(str(ctrl.GetSelection()) + " " + ctrl.GetStringSelection())
+        
+def onCheckList(event):
+    ctrl = ezwx.getWxCtrl('checklist')
+    AppendToText(str(ctrl.GetSelection()) + " " + ctrl.GetStringSelection())
     
-
+def onCheck(event):
+    ctrl = ezwx.getWxCtrl('check1') 
+    value = ctrl.GetValue()
+    print( 'Check1: ' + str(value))
+ 
+def onRadio(event):
+    ctrl = ezwx.getWxCtrl('radio') 
+    print( 'Radio: ' + ctrl.GetString(ctrl.GetSelection()))
+    
 ######################################################################
 # Popup
 ######################################################################
@@ -160,29 +172,37 @@ status_def = [
 
 body_def = [
     [ ezwx.Label ("Folder: "), 
-      ezwx.Text  ("Default Text",key="folder",proportion=1), 
+      ezwx.Text  ("Default Text",key="folder",expand=True,proportion=1), 
       ezwx.Button("Folder", handler=onBrowse, key="browse"),
-      ezwx.Button("Files", handler=onFileBrowse, key="file_browse" )],
-    [ ezwx.Label ("Choices: "), 
-      ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
-      ezwx.Label ("  ComboBox: "), 
-      ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo"),
-      ezwx.Label ("  Date: "), 
-      ezwx.Date  (key='date'),
-      ezwx.Label ("  Time: "), 
-      ezwx.Time  (key='time'), ],
-    [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=1,handler=onList,key="list"),
+      ezwx.Button("Files", handler=onFileBrowse, key="file_browse" ), ],
+    [ ezwx.Check("Check1", handler=onCheck, key='check1'),
+      ezwx.Check("Check2", key='check2'), ],
+    [ ezwx.Label ("Choices: "), ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
+      ezwx.Label ("  ComboBox: "), ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo"),
+      ezwx.Label ("  Date: "), ezwx.Date  (key='date'),
+      ezwx.Label ("  Time: "), ezwx.Time  (key='time'), ],
+    [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=0,handler=onList,key="list"),
+      ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=0,handler=onCheckList,check=True,key="checklist"),
+      ezwx.Scroll( [
+          [ezwx.Radio("Group",["Item1","item2","item3"],"item2",handler=onRadio,key='radio')],
+          [ezwx.Button("1")],[ezwx.Button("2")],[ezwx.Button("3")],[ezwx.Button("4")],
+          [ezwx.Button("5")],[ezwx.Button("6")],[ezwx.Button("7")],[ezwx.Button("8")],
+          [ezwx.Button("9")],[ezwx.Button("10")],
+      ], expand=True, proportion=1),
       ezwx.Notebook([
           [
               "StyledText",
-              [ ezwx.StyledText  ("Default\nMulti Line\nText",expand=True,proportion=1,key="stc"), True]
+              [ ezwx.StyledText ("Default\nMulti Line\nText",expand=True,proportion=1,key="stc"),
+                { 'expand' : True, 'proportion' : 1 } ],
           ],      
           [
               "Text",
-              [ ezwx.Text  ("Default\nMulti Line\nText",proportion=1,expand=True,multiline=True,key="text"), ]
+              [ ezwx.Text  ("Default\nMulti Line\nText",expand=True,proportion=1,multiline=True,key="text"), 
+                { 'expand' : True, 'proportion' : 1 } ],
           ],
-      ]),  #Stretch Proportion is set to 1
-      1, ],
+      ], expand=True, proportion=2, choice=False),  #Stretch Proportion is set to 1
+      { 'proportion' : 1 }
+    ],
     [ ezwx.Panel([
         [ ezwx.Button("A"), ezwx.Button("B")], 
         [ ezwx.Text("C", expand=True, proportion=1)]
@@ -194,9 +214,10 @@ body_def = [
           ], #panel1
           [
               [ ezwx.Calendar(key='calendar',expand=True,proportion=1)],
-          ]  #panel2
-      ]),
-      1 ],
+          ],  #panel2
+      ], expand=True, proportion=1),
+      { 'proportion' : 1 }
+    ],
     [ None,    #Insert Spacer with proportion 1 
       ezwx.Button("ImageView", handler=onImageViewButton),
       ezwx.Button("Calendar", handler=onCalendarButton),

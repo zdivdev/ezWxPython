@@ -183,19 +183,25 @@ Generated Form.
 * Choice : wx.ChoiceBox
 * Combo : wx.ComboBox
 * Date : wx.DatePickerCtrl
+* IExplorer : wx.lib.iewin.IEHtmlWindow
 * Label : wx.StaticText
-* List : wx.ListBox, wx.CheckListBox
+* Line : wx.StaticLine
+* Link : wx.adv.HyperlinkCtrl
+* List : wx.ListBox, wx.CheckListBox, wx.adv.EditableListBox
+* Progress : wx.lib.progressindicator.ProgressIndicator
 * Radio : wx.RadioBox
+* Spin : wx.SpinCtrl
 * StyledText : wx.StyledTextCtrl
 * Text : wx.TextArea + drag and drop files
+* Ticker : wx.lib.tivker.Ticker
 * Time : wx.TimePickerCtrl
 
 ### Implemented Containers
 
-* Notebook : wx.Notebook, wx.Choicebook
+* Book : wx.Notebook, wx.Choicebook, wx.Simplebook
 * Panel : wx.Panel
-* Splitter : wx.SplitterWindow
-* Scroll : wx.ScrollWindow
+* Splitter : wx.SplitterWindow, wx.lib.splitter.MultiSplitterWindow
+* Scroll : wx.ScrolledWindow
 
 ### Implemented Dialogs
 
@@ -205,11 +211,14 @@ Generated Form.
 * MessageBox 
 * MessageYesNo : True, False
 * MessageYesNoCancel : True, False, None
+* ProgressDialog
 * Custom Popup Window : WxPopup 
 
 ## Todo
 
 * More controls support
+  * Tree : wx.TreeCtrl
+  * etc
 * More Containers and Sizers support
 * Command shell interface
 * Network interface support : ssh, sftp, ftp, telnet and etc

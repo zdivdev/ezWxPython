@@ -4,6 +4,8 @@ import wx
 import wx.stc
 import wx.adv
 import wx.xrc
+import wx.lib.splitter
+import wx.lib.ticker
 
 from threading import Thread
 
@@ -13,7 +15,6 @@ from threading import Thread
 
 ID_START = 1000
 CtrlTable = {}
-wxAppRun = True
 wxAppCloseHandler = None
 
 def getId():
@@ -71,10 +72,11 @@ def getBitmap(data):
     bitmap = wx.Bitmap(image) # wx.BitmapFromImage for legacy wx
     return bitmap
     
-def threadHandle(handler,start=False,key=None):
+def threadHandle(handler,start=False,key=None,daemon=True,args=()):
     #from threading import *        
     import threading
-    thread = threading.Thread(target=handler)
+    thread = threading.Thread(target=handler,args=args)
+    thread.daemon = daemon 
     if key is not None:
         registerCtrl(key,thread)        
     if start is True:
@@ -90,13 +92,9 @@ def threadJoin(key):
     if thread is not None:
         thread.join()
   
-def callAfter(handler):
-    wx.CallAfter(handler)
+def callAfter(handler,*args):
+    wx.CallAfter(handler,*args)
    
-def isWxAppRun():
-    global wxAppRun    
-    return wxAppRun
-       
 ######################################################################
 # Layouts
 ######################################################################
@@ -166,6 +164,67 @@ def makeLayout(layout,parent):
         vbox.add(hbox.ctrl,proportion=prop,expand=expand,border=2,align=wx.ALIGN_LEFT|wx.ALL)
     return vbox
 
+class Book(Control): 
+    '''
+    wx.SHOW_EFFECT_NONE	No effect, equivalent to normal wx.Window.Show or Hide() call.
+    wx.SHOW_EFFECT_ROLL_TO_LEFT	Roll window to the left.
+    wx.SHOW_EFFECT_ROLL_TO_RIGHT	Roll window to the right.
+    wx.SHOW_EFFECT_ROLL_TO_TOP	Roll window to the top.
+    wx.SHOW_EFFECT_ROLL_TO_BOTTOM	Roll window to the bottom.
+    wx.SHOW_EFFECT_SLIDE_TO_LEFT	Slide window to the left.
+    wx.SHOW_EFFECT_SLIDE_TO_RIGHT	Slide window to the right.
+    wx.SHOW_EFFECT_SLIDE_TO_TOP	Slide window to the top.
+    wx.SHOW_EFFECT_SLIDE_TO_BOTTOM	Slide window to the bottom.
+    wx.SHOW_EFFECT_BLEND	Fade in or out effect.
+    wx.SHOW_EFFECT_EXPAND	Expanding or collapsing effect.
+    wx.SHOW_EFFECT_MAX    
+    '''
+    def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,style='note',key=None):
+        super().__init__(key,expand,proportion)
+        self.layouts = layouts 
+        self.style = style
+        self.simplePages = []
+        if create is True and parent is not None:
+            self.create(parent)
+    def create(self,parent):
+        if self.style == 'note':
+            self.ctrl = wx.Notebook( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        elif self.style == 'choice':
+            self.ctrl = wx.Choicebook( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        else: #simple
+            self.ctrl = wx.Simplebook( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.panels = []
+        for layout in self.layouts:
+            title = layout[0]
+            layout.remove(title)
+            panel = Panel(layout, self.ctrl, create=True)
+            if self.style == 'simple':
+                self.simplePages.append(panel.ctrl);
+            else:
+                self.ctrl.AddPage( panel.ctrl, title, False )
+        if self.style == 'simple':
+            self.setPage(0)
+    def setEffect(self,):
+        if self.style == 'simple':
+            self.ctrl.SetEffect(wx.SHOW_EFFECT_SLIDE_TO_LEFT)
+    def setPage(self,index):
+        if self.style == 'simple':
+            if index >= len(self.simplePages):
+                index = 0
+            self.ctrl.ShowNewPage(self.simplePages[index])
+
+class Notebook(Book): 
+    def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
+        super().__init__(layouts,parent,create,horizontal,expand,proportion,style='note',key=key)
+
+class Choicebook(Book): 
+    def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
+        super().__init__(layouts,parent,create,horizontal,expand,proportion,style='choice',key=key)
+
+class Simplebook(Book): 
+    def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
+        super().__init__(layouts,parent,create,horizontal,expand,proportion,style='simple',key=key)
+
 class Panel(Control):
     def __init__(self,layout,parent=None,create=False,expand=False,proportion=0,key=None):
         super().__init__(key,expand,proportion)
@@ -178,7 +237,7 @@ class Panel(Control):
         self.ctrl.SetSizer( self.sizer.ctrl )
         self.ctrl.Layout()      
 
-class Scroll(Control): #TODO
+class Scroll(Control): #TODO: Change ScrolledWindow -> ScrolledPane
     def __init__(self,layout,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
         super().__init__(key,expand,proportion)
         self.layout = layout 
@@ -200,15 +259,16 @@ class Scroll(Control): #TODO
         #self.ctrl.SetSizer( wrapSizer(panel.ctrl) )
         self.ctrl.Layout()   
             
-class Spliter(Control):
-    def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
+class Spliter1(Control):
+    def __init__(self,layouts,parent=None,create=False,style='vertical',expand=False,proportion=0,key=None):
         super().__init__(key,expand,proportion)
         self.layouts = layouts #left(top),right(bottom)
+        self.style = style
         if create is True and parent is not None:
             self.create(parent)
     def create(self,parent):
         self.ctrl = wx.SplitterWindow( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SP_3D )
-        self.ctrl.Bind( wx.EVT_IDLE, self.onIdle )
+        #self.ctrl.Bind( wx.EVT_IDLE, self.onIdle )
         self.sashpos = 0
         self.panels = []
         for layout in self.layouts:
@@ -216,30 +276,39 @@ class Spliter(Control):
                 self.sashpos = layout
             else:
                 self.panels.append(Panel(layout, self.ctrl, create=True))
-        self.ctrl.SplitVertically( self.panels[0].ctrl, self.panels[1].ctrl, self.sashpos )
-    def onIdle(self, event):
-        self.ctrl.SetSashPosition(self.sashpos)
-        self.ctrl.Unbind( wx.EVT_IDLE )    
+        if self.style == 'vertical':
+            self.ctrl.SplitVertically( self.panels[0].ctrl, self.panels[1].ctrl, self.sashpos )
+        else:
+            self.ctrl.SplitHorizontally( self.panels[0].ctrl, self.panels[1].ctrl, self.sashpos )
+    #def onIdle(self, event):
+    #    self.ctrl.SetSashPosition(self.sashpos)
+    #    self.ctrl.Unbind( wx.EVT_IDLE )    
 
-class Notebook(Control): #TODO
-    def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,choice=False,key=None):
+    
+class Spliter(Control):
+    def __init__(self,layouts,parent=None,create=False,style='vertical',expand=False,proportion=0,key=None):
         super().__init__(key,expand,proportion)
-        self.layouts = layouts 
-        self.choice = choice
+        self.layouts = layouts #left(top),right(bottom)
+        self.style = style
         if create is True and parent is not None:
             self.create(parent)
     def create(self,parent):
-        if self.choice is True:
-            self.ctrl = wx.Choicebook( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
-        else:
-            self.ctrl = wx.Notebook( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.ctrl = wx.lib.splitter.MultiSplitterWindow( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.sashpos = []
         self.panels = []
         for layout in self.layouts:
-            title = layout[0]
-            layout.remove(title)
-            panel = Panel(layout, self.ctrl, create=True)
-            self.ctrl.AddPage( panel.ctrl, title, False )
+            if type(layout) is int:
+                self.sashpos.append(layout)
+            else:
+                self.panels.append(Panel(layout, self.ctrl, create=True))
+        if self.style == 'vertical': # reverted concept compared with Splitter
+            self.ctrl.SetOrientation(wx.HORIZONTAL)
+        else:
+            self.ctrl.SetOrientation(wx.VERTICAL)
+        for i in range(len(self.panels)):
+            self.ctrl.AppendWindow(self.panels[i].ctrl, self.sashpos[i])
 
+        
 ######################################################################
 # Controls
 ######################################################################
@@ -337,10 +406,23 @@ class Date(Control):
         self.ctrl = wx.adv.DatePickerCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, wx.DefaultPosition, wx.DefaultSize, wx.adv.TP_DEFAULT )
         if self.key is not None:
             registerCtrl( self.key, self )
-            
+
+class IExplorer(Control):
+    import wx.lib.iewin
+    def __init__(self,url=None,expand=False,proportion=0,multiline=False,key=None):
+        super().__init__(key,expand,proportion)
+        self.url = url
+        self.multiline = multiline
+    def create(self,parent):
+        self.ctrl = wx.lib.iewin.IEHtmlWindow( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        if self.url is not None:
+            self.ctrl.LoadUrl(self.url)
+        if self.key is not None:
+            registerCtrl( self.key, self )
+
 class Label(Control):
     def __init__(self,text="",expand=False,proportion=0,multiline=False,key=None):
-        super().__init__(key,proportion)
+        super().__init__(key,expand,proportion)
         self.text = text
         self.multiline = multiline
     def create(self,parent):
@@ -351,24 +433,65 @@ class Label(Control):
         if self.key is not None:
             registerCtrl( self.key, self )
     
+class Line(Control):
+    def __init__(self,text="",expand=False,proportion=0,style="horizontal",key=None):
+        super().__init__(key,expand,proportion)
+        self.style = style
+    def create(self,parent):
+        flags = wx.LI_HORIZONTAL if self.style == "horizontal" else wx.LI_VERTICAL
+        self.ctrl = wx.StaticLine( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0|flags )
+        if self.key is not None:
+            registerCtrl( self.key, self )
+     
+class Link(Control):
+    def __init__(self,text="",url="",expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
+        self.text = text
+        self.url = url
+    def create(self,parent):
+        self.ctrl = wx.adv.HyperlinkCtrl( parent, wx.ID_ANY, self.text, self.url, wx.DefaultPosition, wx.DefaultSize )
+        if self.key is not None:
+            registerCtrl( self.key, self )
+            
 class List(Control):
-    def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,check=False,key=None):
+    def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,check=False,label="",edit=False,key=None):
         super().__init__(key,expand,proportion)
         self.choices = choices
         self.select = select
         self.handler = handler
         self.check = check
+        self.label = label
+        self.edit = edit
     def create(self,parent):        
         id = getId()
-        if self.check is True:
-            self.ctrl = wx.CheckListBox( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
+        if self.edit is True:
+            self.ctrl = wx.adv.EditableListBox( parent, id, self.label, wx.DefaultPosition, wx.DefaultSize, 0 )
+            #TODO:
         else:
-            self.ctrl = wx.ListBox( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
-        self.ctrl.SetSelection(self.select)
-        self.ctrl.Bind( wx.EVT_LISTBOX, self.handler, id=id )
+            if self.check is True:
+                self.ctrl = wx.CheckListBox( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
+            else:
+                self.ctrl = wx.ListBox( parent, id, wx.DefaultPosition,  wx.DefaultSize, self.choices, 0 )
+            self.ctrl.SetSelection(self.select)
+            self.ctrl.Bind( wx.EVT_LISTBOX, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
 
+class Progress(Control):
+    import wx.lib.progressindicator as pi
+    def __init__(self,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
+    def create(self,parent):
+        self.ctrl = wx.lib.progressindicator.ProgressIndicator(parent=parent)
+        if self.key is not None:
+            registerCtrl( self.key, self )
+    def setMaxValue(self,maxValue):
+        self.ctrl.SetRange(maxValue)
+    def update(self,percent):
+        wx.CallAfter(self.callAfter, percent)
+    def callAfter(self,percent):
+        self.ctrl.SetValue(percent)
+    
 class Radio(Control):
     def __init__(self,label="",choices=[],value="",handler=None,expand=False,proportion=0,style='row',key=None):
         super().__init__(key,expand,proportion)
@@ -385,6 +508,37 @@ class Radio(Control):
             if self.value == self.choices[i]:
                 self.ctrl.SetSelection(i)
                 break
+        if self.key is not None:
+            registerCtrl( self.key, self )
+            
+class Slider(Control):
+    def __init__(self,text="",value=0,minValue=0,maxValue=100,handler=None,expand=False,proportion=0,style="horizontal",key=None):
+        super().__init__(key,expand,proportion)
+        self.value = value
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.handler = handler
+        self.style = style
+    def create(self,parent):
+        id = getId()
+        flags = wx.SL_HORIZONTAL if self.style == "horizontal" else wx.SL_VERTICAL
+        self.ctrl = wx.Slider( parent, id, self.value, self.minValue, self.maxValue, wx.DefaultPosition, wx.DefaultSize, 0|flags )
+        self.ctrl.Bind( wx.EVT_SLIDER, self.handler, id=id )
+        if self.key is not None:
+            registerCtrl( self.key, self )
+   
+class Spin(Control):
+    def __init__(self,text="",value="",minValue=0,maxValue=100,handler=None,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
+        self.value = str(value)
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.handler = handler
+    def create(self,parent):
+        id = getId()
+        flags = wx.SP_ARROW_KEYS
+        self.ctrl = wx.SpinCtrl( parent, wx.ID_ANY, self.value, wx.DefaultPosition, wx.DefaultSize, 0|flags, self.minValue, self.maxValue )
+        self.ctrl.Bind( wx.EVT_SPIN, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
             
@@ -440,6 +594,17 @@ class Text(Control):
             self.ctrl.AppendText( filename + '\n' )
             if self.multiline is False:
                 break
+           
+class Ticker(Control):
+    def __init__(self,text="",fgcolor=wx.BLACK,bgcolor=wx.WHITE,expand=True,proportion=0,size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__(key,expand,proportion,size,pos)
+        self.text = text
+        self.fgcolor = fgcolor
+        self.bgcolor = bgcolor
+    def create(self,parent):  
+        self.ctrl = wx.lib.ticker.Ticker( parent, wx.ID_ANY, self.text, self.fgcolor, self.bgcolor, True, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.NO_BORDER )
+        if self.key is not None:
+            registerCtrl( self.key, self )
             
 class Time(Control):
     def __init__(self,date=None,expand=False,proportion=0,key=None):
@@ -447,6 +612,17 @@ class Time(Control):
         self.date = date
     def create(self,parent):  
         self.ctrl = wx.adv.TimePickerCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, wx.DefaultPosition, wx.DefaultSize, wx.adv.TP_DEFAULT )
+        if self.key is not None:
+            registerCtrl( self.key, self )
+       
+class Tree(Control): #TODO
+    def __init__(self,handler=None,expand=False,proportion=0,key=None):
+        super().__init__(key,expand,proportion)
+        self.handler = handler
+    def create(self,parent):  
+        id = getId()
+        self.ctrl = wx.TreeCtrl( parent, id, wx.DefaultPosition, wx.DefaultSize, wx.TR_DEFAULT_STYLE )
+        self.ctrl.Bind( wx.EVT_TREE_SEL_CHANGED, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
             
@@ -502,7 +678,18 @@ def MessageYesNoCancel(title,message):
         return False
     else: #wx.ID_CANCEL, 
         return None
-    
+        
+def ProgressDialog(title,message,maxValue=100): 
+    dlg = wx.ProgressDialog(title, message, maximum=100, parent=None, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE)
+    return dlg
+
+def onProgressDialog(dlg,percent):
+    dlg.Update(percent)
+
+def progressDialogUpdate(dlg,percent):
+    wx.CallAfter(onProgressDialog, dlg, percent)
+
+
 ######################################################################
 # WxApp
 ######################################################################
@@ -514,9 +701,7 @@ def WxAppClose():
     WxMainWindow.frame.Close()
     
 def WxAppCloseEvent(event):
-    global wxAppRun
     global wxAppCloseHandler
-    wxAppRun = False
     if wxAppCloseHandler is not None:
         if wxAppCloseHandler(event) == True:
             event.Skip()
@@ -641,13 +826,6 @@ class WxApp():
         self.toolbar.Realize()
 
     def makeBody(self,body_def):
-        '''
-        self.sizer = wx.BoxSizer()
-        self.panel = Panel(body_def,self.frame,create=True)
-        self.sizer.Add( self.panel.ctrl, 1, wx.EXPAND, 0 )
-        self.sizer.Fit( self.panel.ctrl )
-        self.frame.SetSizer( self.sizer )
-        '''
         self.panel = Panel(body_def,self.frame,create=True)
         self.frame.SetSizer( wrapSizer(self.panel.ctrl) )
         self.frame.Layout()          

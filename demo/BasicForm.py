@@ -34,13 +34,13 @@ def onIdle(event):
 def onTimer(event):
     AppendToText('[Timer] ' + time.ctime())
     
-def onThreadAction():
-    AppendToText('[Thread] ' + time.ctime())
+def onThreadAction(arg1):
+    AppendToText('[Thread] ' + str(arg1))
 
 def onThread():
     from time import sleep
-    while ezwx.isWxAppRun():
-        ezwx.callAfter(onThreadAction)
+    while True:
+        ezwx.callAfter(onThreadAction,(time.ctime()))
         sleep(1.0)    
         
 def onAbout(event):
@@ -124,7 +124,7 @@ def onRadio(event):
 
 popup_body_def = [
     [ ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),      
-      1 ],
+      { 'proportion' : 1 } ],
 ]
 
 popup_layout = {
@@ -172,11 +172,12 @@ status_def = [
 
 body_def = [
     [ ezwx.Label ("Folder: "), 
-      ezwx.Text  ("Default Text",key="folder",expand=True,proportion=1), 
+      ezwx.Text  ("Default Text",key="folder",expand=True,password=True,proportion=1), 
       ezwx.Button("Folder", handler=onBrowse, key="browse"),
       ezwx.Button("Files", handler=onFileBrowse, key="file_browse" ), ],
     [ ezwx.Check("Check1", handler=onCheck, key='check1'),
-      ezwx.Check("Check2", key='check2'), ],
+      ezwx.Check("Check2", key='check2'), 
+      ezwx.Link("Google", "https://www.google.com"), ],
     [ ezwx.Label ("Choices: "), ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
       ezwx.Label ("  ComboBox: "), ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo"),
       ezwx.Label ("  Date: "), ezwx.Date  (key='date'),
@@ -200,22 +201,31 @@ body_def = [
               [ ezwx.Text  ("Default\nMulti Line\nText",expand=True,proportion=1,multiline=True,key="text"), 
                 { 'expand' : True, 'proportion' : 1 } ],
           ],
-      ], expand=True, proportion=2, choice=False),  #Stretch Proportion is set to 1
+      ], expand=True, proportion=2),  
+      ezwx.List(expand=False,proportion=0,label="Editable List", edit=True,key='editlist'),
       { 'proportion' : 1 }
     ],
     [ ezwx.Panel([
         [ ezwx.Button("A"), ezwx.Button("B")], 
-        [ ezwx.Text("C", expand=True, proportion=1)]
+        [ ezwx.Ticker("This is a ticker example text", expand=True, proportion=1)],
+        [ ezwx.Line(expand=True, proportion=1)],
+        [ ezwx.Slider(value=20,expand=True, proportion=1, key='slider')],
+        [ ezwx.Spin(value=20,expand=True, proportion=1, key='spin')],
       ]),
       ezwx.Spliter([
           200, #sashpos
           [ 
               [ ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap")],
-          ], #panel1
+          ],   #panel1
+          200,
           [
               [ ezwx.Calendar(key='calendar',expand=True,proportion=1)],
-          ],  #panel2
-      ], expand=True, proportion=1),
+          ],   #panel2
+          200,
+          [
+              [ ezwx.Calendar(key='calendar',expand=True,proportion=1)],
+          ],   #panel2
+      ], expand=True, proportion=1, style='vertical'),
       { 'proportion' : 1 }
     ],
     [ None,    #Insert Spacer with proportion 1 
@@ -242,7 +252,7 @@ def threadTarget():
     ezwx.runAfter(onThread)
 
 if __name__ == "__main__":
-    window = ezwx.WxApp(u"ezwxApp", 600, 480)
+    window = ezwx.WxApp(u"ezwxApp", 600, 620)
     window.makeLayout(layout)
     window.closeHandle(onClose)
     window.idleHandle(onIdle)

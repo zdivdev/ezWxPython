@@ -60,15 +60,15 @@ menu_def = {
         "Open" : onOpen,
         "-" : None,
         "Exit" : onExit,
-    }, 
+        }, 
     "Edit" : { 
         "Clear" : onClear,
         "Copy"  : onCopy,
         "Paste" : onPaste,
-    }, 
+        }, 
     "Help" : { 
         "About" : onAbout 
-    },
+        },
 }
 
 status_def = [
@@ -76,7 +76,8 @@ status_def = [
 ]
 
 body_def = [
-    [ ezwx.StyledText(expand=True,proportion=1,key="stc"), True], 
+    [ ezwx.StyledText(expand=True,proportion=1,key="stc"),
+      { 'expand' : True, 'proportion' : 1 } ], 
 ]
 
 layout = {
@@ -84,6 +85,7 @@ layout = {
     "status" : status_def, 
     "body"   : body_def, 
 }
+
 
 ######################################################################
 # Main

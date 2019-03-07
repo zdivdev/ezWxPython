@@ -217,16 +217,22 @@ body_def = [
           [ 
               [ ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap")],
           ],   #panel1
-          200,
+          240,
           [
               [ ezwx.Calendar(key='calendar',expand=True,proportion=1)],
           ],   #panel2
-          200,
+          160,
           [
-              [ ezwx.Calendar(key='calendar',expand=True,proportion=1)],
+              [ ezwx.Tree( [ 'Root', 
+                             ['Item-1', [ 'Item-1.1', 'Item-1.2' ],
+                              'Item-2', 
+                              'Item-3', [ 'Item-3.1', 'Item-3.2', 'Item-3.3' ],
+                             ] 
+                          ] ,expand=True,proportion=1,key="tree"), 
+                { 'expand' : True, 'proportion' : 1 } ],
           ],   #panel2
       ], expand=True, proportion=1, style='vertical'),
-      { 'proportion' : 1 }
+      { 'expand' : True, 'proportion' : 1 }
     ],
     [ None,    #Insert Spacer with proportion 1 
       ezwx.Button("ImageView", handler=onImageViewButton),
@@ -252,7 +258,7 @@ def threadTarget():
     ezwx.runAfter(onThread)
 
 if __name__ == "__main__":
-    window = ezwx.WxApp(u"ezwxApp", 600, 620)
+    window = ezwx.WxApp(u"ezwxApp", 900, 620)
     window.makeLayout(layout)
     window.closeHandle(onClose)
     window.idleHandle(onIdle)

@@ -13,24 +13,6 @@ Full source : /demo/BasicForm.py
 import ezWxPython as ezwx
     
 ######################################################################
-# Popup
-######################################################################
-
-popup_body_def = [
-    [ ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),      
-      { 'proportion' : 1 } ],
-]
-
-popup_layout = {
-    "body"   : popup_body_def, 
-}
-
-def onImageViewButton(event):
-    window = ezwx.WxPopup(u"ezwxApp", 600, 480)
-    window.makeLayout(popup_layout)
-    window.Show()
-
-######################################################################
 # Layout
 ######################################################################
         
@@ -173,12 +155,14 @@ Generated Form.
 * Toolbar generation from list with icon buttons + optional text.
 * Statusbar generation from list
 * Body (Client Area) generation from 2-dimentional list. (single VBox + multiple HBoxes)
-* Close Event Handler 
+* Open Event Handler : initializing controls dynamically.
+* Close Event Handler : to save data before exit.
 * Idle Event Handler
 * Timer Event Handler
 * Thread interface : callLater(), WxAppClose()
 * TextArea with Drag and Drop files
 * Support Popup window which can be created same way as main window.
+* Fixed size and dynamic size support for controls.
 
 ### Implemented Controls
 
@@ -201,6 +185,7 @@ Generated Form.
 * Text : wx.TextArea + drag and drop files
 * Ticker : wx.lib.tivker.Ticker
 * Time : wx.TimePickerCtrl
+* Tree : wx.TreeCtrl
 
 ### Implemented Containers
 
@@ -223,8 +208,6 @@ Generated Form.
 ## Todo
 
 * More controls support
-  * Tree : wx.TreeCtrl
-  * etc
 * More Containers and Sizers support
 * Command shell interface
 * Network interface support : ssh, sftp, ftp, telnet and etc

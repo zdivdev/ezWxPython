@@ -211,6 +211,8 @@ Generated Form.
 
 ## Todo
 
+* Tooltip support
+* ContextMenu support
 * More controls support
 * More Containers and Sizers support
 * Command shell interface

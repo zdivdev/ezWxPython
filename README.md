@@ -11,7 +11,7 @@ Full source : /demo/BasicForm.py
 
 ```python
 import ezWxPython as ezwx
-    
+   
 ######################################################################
 # Layout
 ######################################################################
@@ -78,12 +78,16 @@ body_def = [
                 { 'expand' : True, 'proportion' : 1 } ],
           ],
       ], expand=True, proportion=2),  
-      ezwx.List(expand=False,proportion=0,label="Editable List", edit=True,key='editlist'),
+      ezwx.List([[('Name',100,-1),('Sex',32,0),('Age',64,1)], #label, width, align
+                   ["Willy","M","32"],
+                   ["Jane","F","28"],
+          ], expand=True, proportion=2, multicol=True),
+      ezwx.List(expand=False,proportion=1,label="Editable List", edit=True,key='editlist'),
       { 'proportion' : 1 }
     ],
     [ ezwx.Panel([
         [ ezwx.Button("A"), ezwx.Button("B")], 
-        [ ezwx.Ticker("This is a ticker example text", expand=True, proportion=1)],
+        [ ezwx.Ticker("This is a ticker example text", expand=True, proportion=1, key='ticker')],
         [ ezwx.Line(expand=True, proportion=1)],
         [ ezwx.Slider(value=20,expand=True, proportion=1, key='slider')],
         [ ezwx.Spin(value=20,expand=True, proportion=1, key='spin')],
@@ -173,11 +177,10 @@ Generated Form.
 * Choice : wx.ChoiceBox
 * Combo : wx.ComboBox
 * Date : wx.DatePickerCtrl
-* IExplorer : wx.lib.iewin.IEHtmlWindow
 * Label : wx.StaticText
 * Line : wx.StaticLine
 * Link : wx.adv.HyperlinkCtrl
-* List : wx.ListBox, wx.CheckListBox, wx.adv.EditableListBox
+* List : wx.ListBox, wx.CheckListBox, wx.ListCtrl, wx.adv.EditableListBox
 * Progress : wx.lib.progressindicator.ProgressIndicator
 * Radio : wx.RadioBox
 * Spin : wx.SpinCtrl
@@ -186,6 +189,7 @@ Generated Form.
 * Ticker : wx.lib.tivker.Ticker
 * Time : wx.TimePickerCtrl
 * Tree : wx.TreeCtrl
+* Web : wx.lib.iewin.IEHtmlWindow
 
 ### Implemented Containers
 

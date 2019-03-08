@@ -17,6 +17,9 @@ def onExit(event):
     
 def onClose(event): #return True if want to exit
     rv = ezwx.MessageYesNo("Alert", "Do you want to quit ?" )
+    if rv is True:
+        ticker = ezwx.getWxCtrl('ticker')
+        ticker.Stop()
     return rv
         
 idle_time = 0
@@ -202,12 +205,16 @@ body_def = [
                 { 'expand' : True, 'proportion' : 1 } ],
           ],
       ], expand=True, proportion=2),  
-      ezwx.List(expand=False,proportion=0,label="Editable List", edit=True,key='editlist'),
+      ezwx.List([[('Name',100,-1),('Sex',32,0),('Age',64,1)], #label, width, align
+                   ["Willy","M","32"],
+                   ["Jane","F","28"],
+          ], expand=True, proportion=2, multicol=True),
+      ezwx.List(expand=False,proportion=1,label="Editable List", edit=True,key='editlist'),
       { 'proportion' : 1 }
     ],
     [ ezwx.Panel([
         [ ezwx.Button("A"), ezwx.Button("B")], 
-        [ ezwx.Ticker("This is a ticker example text", expand=True, proportion=1)],
+        [ ezwx.Ticker("This is a ticker example text", expand=True, proportion=1, key='ticker')],
         [ ezwx.Line(expand=True, proportion=1)],
         [ ezwx.Slider(value=20,expand=True, proportion=1, key='slider')],
         [ ezwx.Spin(value=20,expand=True, proportion=1, key='spin')],

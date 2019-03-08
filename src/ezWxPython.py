@@ -322,6 +322,10 @@ class FileDrop(wx.FileDropTarget):
         return True
     
 class Bitmap(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,filename=None,bitmap=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -340,6 +344,10 @@ class Bitmap(Control):
         event.Skip()
 
 class Button(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,label="",handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -353,6 +361,10 @@ class Button(Control):
             registerCtrl( self.key, self )
 
 class Calendar(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,date=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -363,6 +375,10 @@ class Calendar(Control):
             registerCtrl( self.key, self )
         
 class Check(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,label="",handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -376,6 +392,10 @@ class Check(Control):
             registerCtrl( self.key, self )
                   
 class Choice(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -391,6 +411,10 @@ class Choice(Control):
             registerCtrl( self.key, self )
 
 class Combo(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,choices=[],value="",handler=None,expand=False,proportion=0, 
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -405,6 +429,10 @@ class Combo(Control):
             registerCtrl( self.key, self )
      
 class Date(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,date=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -414,20 +442,11 @@ class Date(Control):
         if self.key is not None:
             registerCtrl( self.key, self )
 
-class IExplorer(Control):
-    def __init__(self,url=None,expand=False,proportion=0,multiline=False,
-                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
-        super().__init__(key,expand,proportion,size,pos)
-        self.url = url
-        self.multiline = multiline
-    def create(self,parent):
-        self.ctrl = wx.lib.iewin.IEHtmlWindow( parent, wx.ID_ANY, self.pos, self.size, 0 )
-        if self.url is not None:
-            self.ctrl.LoadUrl(self.url)
-        if self.key is not None:
-            registerCtrl( self.key, self )
-            
 class Label(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,text="",expand=False,proportion=0,multiline=False,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -442,6 +461,10 @@ class Label(Control):
             registerCtrl( self.key, self )
     
 class Line(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,text="",expand=False,proportion=0,style="horizontal",
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -453,6 +476,10 @@ class Line(Control):
             registerCtrl( self.key, self )
      
 class Link(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,text="",url="",expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -464,20 +491,162 @@ class Link(Control):
             registerCtrl( self.key, self )
             
 class List(Control):
+    '''
+    Methods Summary: ListBox
+        Deselect(self, n)
+        EnsureVisible(self, n)
+        FindString(self, string, caseSensitive=False)
+        GetCount(self)
+        GetSelection(self)
+        GetSelections(self)
+        GetString(self, n)
+        HitTest(self, *args, **kw)
+        HitTest (self, point)
+        HitTest (self, x, y)
+        InsertItems(self, items, pos)
+        IsSelected(self, n)
+        IsSorted(self)
+        SetFirstItem(self, *args, **kw)
+        SetFirstItem (self, n)
+        SetFirstItem (self, string)
+        SetItemBackgroundColour(self, item, c)
+        SetItemFont(self, item, f)
+        SetItemForegroundColour(self, item, c)
+        SetSelection(self, n)
+        SetString(self, n, string)
+        SetStringSelection(self, *args, **kw)
+        SetStringSelection (self, s, select)
+        SetStringSelection (self, s)
+    Methods Summary: ListCtrl
+        Append(self, entry)
+        AppendColumn(self, heading, format=LIST_FORMAT_LEFT, width=-1)
+        Arrange(self, flag=LIST_ALIGN_DEFAULT)
+        AssignImageList(self, imageList, which)
+        ClearAll(self)
+        ClearColumnImage(self, col)
+        Create(self, parent, id=ID_ANY, pos=DefaultPosition, size=DefaultSize, style=LC_ICON, validator=DefaultValidator, name=ListCtrlNameStr)
+        DeleteAllColumns(self)
+        DeleteAllItems(self)
+        DeleteColumn(self, col)
+        DeleteItem(self, item)
+        EditLabel(self, item)
+        EnableAlternateRowColours(self, enable=True)
+        EnableBellOnNoMatch(self, on=True)
+        EnsureVisible(self, item)
+        FindItem(self, *args, **kw)
+        FindItem (self, start, str, partial=False)
+        FindItem (self, start, data)
+        FindItem (self, start, pt, direction)
+        Focus(self, idx)
+        GetColumn(self, col)
+        GetColumnCount(self)
+        GetColumnIndexFromOrder(self, pos)
+        GetColumnOrder(self, col)
+        GetColumnWidth(self, col)
+        GetColumnsOrder(self)
+        GetCountPerPage(self)
+        GetEditControl(self)
+        GetFirstSelected(self, *args)
+        GetFocusedItem(self)
+        GetImageList(self, which)
+        GetItem(self, itemIdx, col=0)
+        GetItemBackgroundColour(self, item)
+        GetItemCount(self)
+        GetItemData(self, item)
+        GetItemFont(self, item)
+        GetItemPosition(self, item)
+        GetItemRect(self, item, code=LIST_RECT_BOUNDS)
+        GetItemSpacing(self)
+        GetItemState(self, item, stateMask)
+        GetItemText(self, item, col=0)
+        GetItemTextColour(self, item)
+        GetMainWindow(self)
+        GetNextItem(self, item, geometry=LIST_NEXT_ALL, state=LIST_STATE_DONTCARE)
+        Searches for an item with the given geometry or state, starting from item but excluding the item itself.
+        GetNextSelected(self, item)
+        GetSelectedItemCount(self)
+        GetSubItemRect(self, item, subItem, rect, code=LIST_RECT_BOUNDS)
+        GetTextColour(self)
+        GetTopItem(self)
+        GetViewRect(self)
+        HasColumnOrderSupport(self)
+        HitTest(self, point)
+        HitTestSubItem(self, itTestSubItem(point)
+        InReportView(self)
+        InsertColumn(self, *args, **kw)
+        InsertColumn (self, col, info)
+        InsertColumn (self, col, heading, format=LIST_FORMAT_LEFT, width=LIST_AUTOSIZE)
+        InsertItem(self, *args, **kw)
+        InsertItem (self, info)
+        InsertItem (self, index, label)
+        InsertItem (self, index, imageIndex)
+        InsertItem (self, index, label, imageIndex)
+        IsSelected(self, idx)
+        IsVirtual(self)
+        OnGetItemAttr(self, item)
+        OnGetItemColumnImage(self, item, column)
+        OnGetItemImage(self, item)
+        OnGetItemText(self, item, column)
+        RefreshItem(self, item)
+        RefreshItems(self, itemFrom, itemTo)
+        ScrollList(self, dx, dy)
+        Select(self, idx, on=1)
+        SetAlternateRowColour(self, colour)
+        SetBackgroundColour(self, col)
+        SetColumn(self, col, item)
+        SetColumnImage(self, col, image)
+        SetColumnWidth(self, col, width)
+        SetColumnsOrder(self, orders)
+        SetImageList(self, imageList, which)
+        SetItem(self, *args, **kw)
+        SetItem (self, info)
+        SetItem (self, index, column, label, imageId=-1)
+        SetItemBackgroundColour(self, item, col)
+        SetItemColumnImage(self, item, column, image)
+        SetItemCount(self, count)
+        SetItemData(self, item, data)
+        SetItemFont(self, item, font)
+        SetItemImage(self, item, image, selImage=-1)
+        SetItemPosition(self, item, pos)
+        SetItemState(self, item, state, stateMask)
+        SetItemText(self, item, text)
+        SetItemTextColour(self, item, col)
+        SetSingleStyle(self, style, add=True)
+        SetTextColour(self, col)
+        SetWindowStyleFlag(self, style)
+        SortItems(self, fnSortCallBack)
+        def ListCompareFunction(self, item1, item2):
+    '''
     def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,
-                 size=wx.DefaultSize,pos=wx.DefaultPosition,check=False,label="",edit=False,key=None):
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,check=False,label="",multicol=False,edit=False,key=None):
         super().__init__(key,expand,proportion,size,pos)
         self.choices = choices
         self.select = select
         self.handler = handler
         self.check = check
         self.label = label
+        self.multicol = multicol
         self.edit = edit
-    def create(self,parent):        
+    def create(self,parent):    
+        import sys
         id = getId()
         if self.edit is True:
             self.ctrl = wx.adv.EditableListBox( parent, id, self.label, self.pos, self.size, 0 )
             #TODO:
+        elif self.multicol is True:
+            self.ctrl = wx.ListCtrl(parent, id, style = wx.LC_REPORT)
+            widths = []
+            if len(self.choices) > 1:
+                aligns = (wx.LIST_FORMAT_LEFT, wx.LIST_FORMAT_CENTER, wx.LIST_FORMAT_RIGHT)
+                cols = len(self.choices[0])
+                for col in range(cols):
+                    label = self.choices[0][col][0]
+                    width = self.choices[0][col][1]
+                    align = aligns[self.choices[0][col][2]+1]
+                    self.ctrl.AppendColumn(label, align, width) 
+                    #self.ctrl.InsertColumn(col, label, align, width) 
+                for row in range(1,len(self.choices)):
+                    self.ctrl.Append(self.choices[row]) 
         else:
             if self.check is True:
                 self.ctrl = wx.CheckListBox( parent, id, self.pos, self.size, self.choices, 0 )
@@ -489,6 +658,10 @@ class List(Control):
             registerCtrl( self.key, self )
 
 class Progress(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     import wx.lib.progressindicator as pi
     def __init__(self,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
@@ -505,6 +678,10 @@ class Progress(Control):
         self.ctrl.SetValue(percent)
     
 class Radio(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,label="",choices=[],value="",handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,style='row',key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -525,6 +702,10 @@ class Radio(Control):
             registerCtrl( self.key, self )
             
 class Slider(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,text="",value=0,minValue=0,maxValue=100,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,style="horizontal",key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -542,6 +723,10 @@ class Slider(Control):
             registerCtrl( self.key, self )
    
 class Spin(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,text="",value="",minValue=0,maxValue=100,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -558,6 +743,10 @@ class Spin(Control):
             registerCtrl( self.key, self )
             
 class StyledText(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,text="",expand=True,proportion=1,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -587,6 +776,80 @@ class StyledText(Control):
         self.ctrl.SetMarginWidth(2, 16) # 2,25
         
 class Text(Control):
+    '''
+    Methods Summary: TextEntry
+        AppendText(self, text)
+        AutoComplete(self, *args, **kw)
+        AutoComplete (self, choices)
+        AutoComplete (self, completer)
+        AutoCompleteDirectories(self)
+        AutoCompleteFileNames(self)
+        CanCopy(self)
+        CanCut(self)
+        CanPaste(self)
+        CanRedo(self)
+        CanUndo(self)
+        ChangeValue(self, value)
+        Clear(self)
+        Copy(self)
+        Cut(self)
+        GetHint(self)
+        GetInsertionPoint(self)
+        GetLastPosition(self)
+        GetMargins(self)
+        GetRange(self, from_, to_)
+        GetSelection(self)
+        GetStringSelection(self)
+        GetValue(self)
+        IsEditable(self)
+        IsEmpty(self)
+        Paste(self)
+        Redo(self)
+        Remove(self, from_, to_)
+        Replace(self, from_, to_, value)
+        SelectAll(self)
+        SelectNone(self)
+        SetEditable(self, editable)
+        SetHint(self, hint)
+        SetInsertionPoint(self, pos)
+        SetInsertionPointEnd(self)
+        SetMargins(self, *args, **kw)
+        SetMargins (self, pt)
+        SetMargins (self, left, top=-1)
+        SetMaxLength(self, len)
+        SetSelection(self, from_, to_)
+        SetValue(self, value)
+        Undo(self)
+        WriteText(self, text)
+    Methods Summary: TextCtrl
+        DiscardEdits(self)
+        EmulateKeyPress(self, event)
+        GetDefaultStyle(self)
+        GetLineLength(self, lineNo)
+        GetLineText(self, lineNo)
+        GetNumberOfLines(self)
+        GetStyle(self, position, style)
+        HideNativeCaret(self)
+        HitTestPos(self, pt)
+        HitTest(self, pt)
+        IsModified(self)
+        IsMultiLine(self)
+        IsSingleLine(self)
+        LoadFile(self, filename, fileType=TEXT_TYPE_ANY)
+        MacCheckSpelling(self, check)
+        MarkDirty(self)
+        PositionToCoords(self, pos)
+        PositionToXY(self, pos)
+        SaveFile(self, filename="", fileType=TEXT_TYPE_ANY)
+        SetDefaultStyle(self, style)
+        SetModified(self, modified)
+        SetStyle(self, start, end, style)
+        ShowNativeCaret(self, show=True)
+        ShowPosition(self, pos)
+        XYToPosition(self, x, y)
+        flush(self)
+        write(self, text)
+    '''
     def __init__(self,text="",expand=True,proportion=0,size=wx.DefaultSize,pos=wx.DefaultPosition,
                  multiline=False,password=False,readonly=False,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -612,6 +875,10 @@ class Text(Control):
                 break
            
 class Ticker(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,text="",fgcolor=wx.BLACK,bgcolor=wx.WHITE,expand=True,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -624,6 +891,10 @@ class Ticker(Control):
             registerCtrl( self.key, self )
             
 class Time(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
     def __init__(self,date=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -635,6 +906,13 @@ class Time(Control):
        
         
 class Tree(Control): 
+    '''
+    Methods Summary
+        AppendText(self, text)
+        Clear()
+        Copy()
+    Properties Summary
+    '''
     def __init__(self,data=None,collapse=False,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -659,7 +937,55 @@ class Tree(Control):
             if type(item) is list and node is not None:
                 self.addItems(node,item)
             else: #list
-                node = self.ctrl.AppendItem(parent,item)
+                node = self.ctrl.AppendItem(parent,item)       
+
+class Web(Control):
+    '''
+    Methods Summary
+        CanGoBack(self)
+        CanGoForward(self)
+        CommandStateChange(self, this, command, enable)
+        GetStringSelection(self, asHTML=True) Returns the contents of the selected portion of the document as either html or plain text.
+        GetText(self, asHTML=True) Returns the contents of the the html document as either html or plain text.
+        GoBack(self)
+        GoForward(self)
+        GoHome(self)
+        GoSearch(self)
+        LoadStream(self, stream)
+        Load the html document from a Python file-like object.
+        LoadString(self, html)
+        Load the html document from a string
+        LoadUrl(self, URL, Flags=0)
+        Load the document from url.
+        Navigate(self, URL, Flags=0, TargetFrameName=None, PostData=None, Headers=None)
+        Print(self, showDialog=False)
+        PrintPreview(self)
+        Quit(self)
+        RefreshPage(self, Level=REFRESH_NORMAL)
+        Stop(self)    
+    Properties Summary
+        busy	 
+        document	 
+        locationname	 
+        locationurl	 
+        offline	 
+        readystate	 
+        registerasbrowser	 
+        registerasdroptarget	 
+        silent	 
+        type
+    '''
+    def __init__(self,url=None,engine='ie',expand=False,proportion=0,size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__(key,expand,proportion,size,pos)
+        self.url = url
+        self.engine = engine
+    def create(self,parent):
+        if self.engine == 'ie':
+            self.ctrl = wx.lib.iewin.IEHtmlWindow( parent, wx.ID_ANY, self.pos, self.size, 0 )
+            if self.url is not None:
+                self.ctrl.LoadUrl(self.url)
+            if self.key is not None:
+                registerCtrl( self.key, self )
         
 ######################################################################
 # Dialogs

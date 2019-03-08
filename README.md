@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
 Generated Form.
 
-![basic_form](https://3.bp.blogspot.com/-AFTomaJTCMM/XIEk9qN94xI/AAAAAAAAAic/aqRiYNAdxZk3YwHFdhS2jncWgt6mUJxDQCLcBGAs/s1600/win8.png)   
+![basic_form](https://3.bp.blogspot.com/-Ql19xAnsDzE/XIJusJqjHjI/AAAAAAAAAio/YMPtZcLIyD8dQql5VI0KEHVz99PmTPFsgCLcBGAs/s1600/win9.png)   
 
 
 ## Status

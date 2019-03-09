@@ -697,11 +697,19 @@ class Picker(Control):
             self.value = wx.NullFont if self.value is None else self.value
             self.ctrl = wx.FontPickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.FNTP_DEFAULT_STYLE )
             self.ctrl.Bind( wx.EVT_FONTPICKER_CHANGED, self.handler, id=id )
+        elif self.style == 'date':
+            self.value = wx.DefaultDateTime if self.value is None else self.value
+            self.ctrl = wx.adv.DatePickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.adv.TP_DEFAULT )
+            self.ctrl.Bind( wx.adv.EVT_DATE_CHANGED, self.handler, id=id )
+        elif self.style == 'time':
+            self.value = wx.DefaultDateTime if self.value is None else self.value
+            self.ctrl = wx.adv.TimePickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.adv.TP_DEFAULT )
+            self.ctrl.Bind( wx.adv.EVT_TIME_CHANGED, self.handler, id=id )
         else: #TODO: throw exception
             pass 
         if self.key is not None:
             registerCtrl( self.key, self )
-
+            
 class DirPicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
@@ -711,7 +719,7 @@ class FilePicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__('file',value,handler,expand,proportion,size,pos,key)
-        
+               
 class ColorPicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
@@ -721,7 +729,17 @@ class FontPicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__('font',value,handler,expand,proportion,size,pos,key)
-                
+
+class DatePicker(Picker):
+    def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__('date',value,handler,expand,proportion,size,pos,key)
+       
+class TimePicker(Picker):
+    def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__('time',value,handler,expand,proportion,size,pos,key)
+                           
 class Progress(Control):
     '''
     Methods Summary

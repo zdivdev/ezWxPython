@@ -37,6 +37,16 @@ def onFileSelect(event):
     ctrl = ezwx.getWxCtrl('file')
     print(event.GetPath())
     print(ctrl.GetPath())
+
+def onDateSelect(event):
+    ctrl = ezwx.getWxCtrl('date')
+    print(event.GetDate())
+    print(ctrl.GetValue())
+
+def onTimeSelect(event):
+    ctrl = ezwx.getWxCtrl('time')
+    print(event.GetDate())
+    print(ctrl.GetValue())
     
 def onColorSelect(event):
     ctrl = ezwx.getWxCtrl('color')
@@ -62,7 +72,17 @@ def onFileSelect2(event):
     ctrl = ezwx.getWxCtrl('file2')
     print(event.GetPath())
     print(ctrl.GetPath())
-    
+
+def onDateSelect2(event):
+    ctrl = ezwx.getWxCtrl('date2')
+    print(event.GetDate())
+    print(ctrl.GetValue())
+
+def onTimeSelect2(event):
+    ctrl = ezwx.getWxCtrl('time2')
+    print(event.GetDate())
+    print(ctrl.GetValue())
+          
 def onColorSelect2(event):
     ctrl = ezwx.getWxCtrl('color2')
     print(event.GetColour())
@@ -97,11 +117,15 @@ status_def = [
 body_def = [
     [ ezwx.Picker("dir",  expand=True, proportion=1, handler=onDirSelect, key="dir"),], 
     [ ezwx.Picker("file", expand=True, proportion=1, handler=onFileSelect, key="file"),], 
+    [ ezwx.Picker("date",expand=True, handler=onDateSelect, key="date"),], 
+    [ ezwx.Picker("time",expand=True, handler=onTimeSelect, key="time"),], 
     [ ezwx.Picker("color",expand=True, handler=onColorSelect, key="color"),], 
     [ ezwx.Picker("font", expand=True, size=(240,72), handler=onFontSelect, key="font"),],     
     [ ezwx.Line(),],     
     [ ezwx.DirPicker(expand=True, proportion=1, handler=onDirSelect2, key="dir2"),], 
     [ ezwx.FilePicker(expand=True, proportion=1, handler=onFileSelect2, key="file2"),], 
+    [ ezwx.DatePicker(expand=True, handler=onDateSelect2, key="date2"),], 
+    [ ezwx.TimePicker(expand=True, handler=onTimeSelect2, key="time2"),], 
     [ ezwx.ColorPicker(expand=True, handler=onColorSelect2, key="color2"),], 
     [ ezwx.FontPicker(expand=True, size=(240,72), handler=onFontSelect2, key="font2"),],     
 ]

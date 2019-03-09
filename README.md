@@ -176,18 +176,20 @@ Generated Form.
 * Check : wx.CheckBox
 * Choice : wx.ChoiceBox
 * Combo : wx.ComboBox
-* Date : wx.DatePickerCtrl
+* Date : wx.DatePickerCtrl -> moved to Picker
 * Label : wx.StaticText
 * Line : wx.StaticLine
 * Link : wx.adv.HyperlinkCtrl
 * List : wx.ListBox, wx.CheckListBox, wx.ListCtrl, wx.adv.EditableListBox
+* Picker : wx.DirPickerCtrl, wx.FilePickerCtrl, wx.ColourPickerCtrl, wx.FontPickerCtrl, wx.adv.DatePickerCtrl, wx.adv.TimePickerCtrl
+  * DirPicker, FilePicker, ColorPicker, FontPicker, DatePicker, TimePicker, DatePicker, TimePicker
 * Progress : wx.lib.progressindicator.ProgressIndicator
 * Radio : wx.RadioBox
 * Spin : wx.SpinCtrl
 * StyledText : wx.StyledTextCtrl
 * Text : wx.TextArea + drag and drop files
 * Ticker : wx.lib.tivker.Ticker
-* Time : wx.TimePickerCtrl
+* Time : wx.TimePickerCtrl -> moved to Picker
 * Tree : wx.TreeCtrl
 * Web : wx.lib.iewin.IEHtmlWindow
 

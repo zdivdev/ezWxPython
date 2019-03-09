@@ -182,7 +182,7 @@ Generated Form.
 * Link : wx.adv.HyperlinkCtrl
 * List : wx.ListBox, wx.CheckListBox, wx.ListCtrl, wx.adv.EditableListBox
 * Picker : wx.DirPickerCtrl, wx.FilePickerCtrl, wx.ColourPickerCtrl, wx.FontPickerCtrl, wx.adv.DatePickerCtrl, wx.adv.TimePickerCtrl
-  * DirPicker, FilePicker, ColorPicker, FontPicker, DatePicker, TimePicker, DatePicker, TimePicker
+  * DirPicker, FilePicker, ColorPicker, FontPicker, DatePicker, TimePicker
 * Progress : wx.lib.progressindicator.ProgressIndicator
 * Radio : wx.RadioBox
 * Spin : wx.SpinCtrl
@@ -196,7 +196,7 @@ Generated Form.
 ### Implemented Containers
 
 * Book : wx.Notebook, wx.Choicebook, wx.Simplebook
-* Panel : wx.Panel
+* Panel : wx.Panel, wx.CollapsiblePane
 * Splitter : wx.SplitterWindow, wx.lib.splitter.MultiSplitterWindow
 * Scroll : wx.ScrolledWindow
 

@@ -226,16 +226,27 @@ class Simplebook(Book):
         super().__init__(layouts,parent,create,horizontal,expand,proportion,style='simple',key=key)
 
 class Panel(Control):
-    def __init__(self,layout,parent=None,create=False,expand=False,proportion=0,key=None):
+    def __init__(self,layout,parent=None,create=False,expand=False,proportion=0,label="",collapsible=False,key=None):
         super().__init__(key,expand,proportion)
         self.layout = layout
+        self.label = label
+        self.collapsible = collapsible
         if create is True and parent is not None:
             self.create(parent)
     def create(self,parent):
-        self.ctrl = wx.Panel( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.sizer = makeLayout(self.layout,self.ctrl)
-        self.ctrl.SetSizer( self.sizer.ctrl )
-        self.ctrl.Layout()      
+        if self.collapsible is True:
+            self.ctrl = wx.CollapsiblePane( parent, wx.ID_ANY, self.label, wx.DefaultPosition, wx.DefaultSize, wx.CP_DEFAULT_STYLE|wx.CP_NO_TLW_RESIZE )
+            pane = self.ctrl.GetPane()
+            self.sizer = makeLayout(self.layout,pane)
+            pane.SetSizer( self.sizer.ctrl )
+            self.ctrl.Expand()
+            self.sizer.ctrl.SetSizeHints(pane)
+            pane.Layout()      
+        else:
+            self.ctrl = wx.Panel( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+            self.sizer = makeLayout(self.layout,self.ctrl)
+            self.ctrl.SetSizer( self.sizer.ctrl )
+            self.ctrl.Layout()      
 
 class Scroll(Control): #TODO: Change ScrolledWindow -> ScrolledPane
     def __init__(self,layout,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
@@ -657,6 +668,60 @@ class List(Control):
         if self.key is not None:
             registerCtrl( self.key, self )
 
+class Picker(Control):
+    '''
+    Methods Summary
+    Properties Summary
+    '''
+    def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__(key,expand,proportion,size,pos)
+        self.style = style
+        self.value = value
+        self.handler = handler
+    def create(self,parent):    
+        id = getId()
+        if self.style == 'dir': #value: path str
+            self.value = "" if self.value is None else self.value
+            self.ctrl = wx.DirPickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.DIRP_DEFAULT_STYLE )
+            self.ctrl.Bind( wx.EVT_DIRPICKER_CHANGED, self.handler, id=id )
+        elif self.style == 'file':
+            self.value = "" if self.value is None else self.value
+            self.ctrl = wx.FilePickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.FLP_DEFAULT_STYLE )
+            self.ctrl.Bind( wx.EVT_FILEPICKER_CHANGED, self.handler, id=id )
+        elif self.style == 'color': 
+            self.value = wx.BLACK if self.value is None else self.value
+            self.ctrl = wx.ColourPickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.CLRP_DEFAULT_STYLE )
+            self.ctrl.Bind( wx.EVT_COLOURPICKER_CHANGED, self.handler, id=id )
+        elif self.style == 'font':
+            self.value = wx.NullFont if self.value is None else self.value
+            self.ctrl = wx.FontPickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.FNTP_DEFAULT_STYLE )
+            self.ctrl.Bind( wx.EVT_FONTPICKER_CHANGED, self.handler, id=id )
+        else: #TODO: throw exception
+            pass 
+        if self.key is not None:
+            registerCtrl( self.key, self )
+
+class DirPicker(Picker):
+    def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__('dir',value,handler,expand,proportion,size,pos,key)
+
+class FilePicker(Picker):
+    def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__('file',value,handler,expand,proportion,size,pos,key)
+        
+class ColorPicker(Picker):
+    def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__('color',value,handler,expand,proportion,size,pos,key)
+        
+class FontPicker(Picker):
+    def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__('font',value,handler,expand,proportion,size,pos,key)
+                
 class Progress(Control):
     '''
     Methods Summary
@@ -887,9 +952,13 @@ class Ticker(Control):
         self.bgcolor = bgcolor
     def create(self,parent):  
         self.ctrl = wx.lib.ticker.Ticker( parent, wx.ID_ANY, self.text, self.fgcolor, self.bgcolor, True, pos=self.pos, size=self.size, style=wx.NO_BORDER )
+        self.ctrl.Bind(wx.EVT_CLOSE, self.onClose)
         if self.key is not None:
             registerCtrl( self.key, self )
-            
+    def onClose(self,event):
+        self.ctrl.Stop()
+        event.Skip()
+    
 class Time(Control):
     '''
     Methods Summary
@@ -986,7 +1055,7 @@ class Web(Control):
                 self.ctrl.LoadUrl(self.url)
             if self.key is not None:
                 registerCtrl( self.key, self )
-        
+       
 ######################################################################
 # Dialogs
 ######################################################################

@@ -1,12 +1,7 @@
 import os
 import sys
 import wx
-import wx.stc
 import wx.adv
-import wx.xrc
-import wx.lib.splitter
-import wx.lib.ticker
-import wx.lib.iewin
 
 from threading import Thread
 
@@ -95,6 +90,12 @@ def threadJoin(key):
 def callAfter(handler,*args):
     wx.CallAfter(handler,*args)
    
+def doBusyJob(job,args=(),message="Please wait ...",parent=None,bgColor=None,fgColor=None):
+    import wx.lib.busy
+    with wx.lib.busy.BusyInfo(message,parent,bgColor,fgColor):
+        job(args)
+
+        
 ######################################################################
 # Layouts
 ######################################################################
@@ -226,15 +227,35 @@ class Simplebook(Book):
         super().__init__(layouts,parent,create,horizontal,expand,proportion,style='simple',key=key)
 
 class Panel(Control):
-    def __init__(self,layout,parent=None,create=False,expand=False,proportion=0,label="",collapsible=False,key=None):
+    import wx.lib.scrolledpanel
+    def __init__(self,layout,parent=None,create=False,expand=False,proportion=0,label="",style=None,key=None):
         super().__init__(key,expand,proportion)
         self.layout = layout
         self.label = label
-        self.collapsible = collapsible
+        self.style = style
         if create is True and parent is not None:
             self.create(parent)
     def create(self,parent):
-        if self.collapsible is True:
+        if self.style is None:
+            self.ctrl = wx.Panel( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+            self.sizer = makeLayout(self.layout,self.ctrl)
+            self.ctrl.SetSizer( self.sizer.ctrl )
+            self.ctrl.Layout()      
+        elif self.style == 'scroll':
+            self.ctrl = wx.lib.scrolledpanel.ScrolledPanel( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL|wx.TAB_TRAVERSAL )
+            self.sizer = makeLayout(self.layout,self.ctrl)
+            self.ctrl.SetSizer( self.sizer.ctrl )
+            #begin for scrolledwindow
+            self.ctrl.SetAutoLayout(1)
+            #self.ctrl.SetupScrolling(scroll_y = True)
+            width = self.ctrl.GetBestSize().width
+            height = self.ctrl.GetBestSize().height
+            self.ctrl.SetSize((width, height))
+            self.ctrl.SetScrollbars( 1, 1, 1, 1 )              
+            self.sizer.ctrl.SetSizeHints(self.ctrl)
+            #end
+            self.ctrl.Layout()          
+        elif self.style == 'collapsible':
             self.ctrl = wx.CollapsiblePane( parent, wx.ID_ANY, self.label, wx.DefaultPosition, wx.DefaultSize, wx.CP_DEFAULT_STYLE|wx.CP_NO_TLW_RESIZE )
             pane = self.ctrl.GetPane()
             self.sizer = makeLayout(self.layout,pane)
@@ -242,11 +263,7 @@ class Panel(Control):
             self.ctrl.Expand()
             self.sizer.ctrl.SetSizeHints(pane)
             pane.Layout()      
-        else:
-            self.ctrl = wx.Panel( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-            self.sizer = makeLayout(self.layout,self.ctrl)
-            self.ctrl.SetSizer( self.sizer.ctrl )
-            self.ctrl.Layout()      
+    
 
 class Scroll(Control): #TODO: Change ScrolledWindow -> ScrolledPane
     def __init__(self,layout,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
@@ -297,6 +314,7 @@ class Spliter1(Control):
 
     
 class Spliter(Control):
+    import wx.lib.splitter    
     def __init__(self,layouts,parent=None,create=False,style='vertical',expand=False,proportion=0,key=None):
         super().__init__(key,expand,proportion)
         self.layouts = layouts #left(top),right(bottom)
@@ -629,22 +647,25 @@ class List(Control):
         def ListCompareFunction(self, item1, item2):
     '''
     def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,
-                 size=wx.DefaultSize,pos=wx.DefaultPosition,check=False,label="",multicol=False,edit=False,key=None):
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,check=False,label="",style=None,key=None):
         super().__init__(key,expand,proportion,size,pos)
         self.choices = choices
         self.select = select
         self.handler = handler
         self.check = check
         self.label = label
-        self.multicol = multicol
-        self.edit = edit
+        self.style = style
     def create(self,parent):    
         import sys
         id = getId()
-        if self.edit is True:
-            self.ctrl = wx.adv.EditableListBox( parent, id, self.label, self.pos, self.size, 0 )
-            #TODO:
-        elif self.multicol is True:
+        if self.style is None:
+            if self.check is True:
+                self.ctrl = wx.CheckListBox( parent, id, self.pos, self.size, self.choices, 0 )
+            else:
+                self.ctrl = wx.ListBox( parent, id, self.pos, self.size, self.choices, 0 )
+            self.ctrl.SetSelection(self.select)
+            self.ctrl.Bind( wx.EVT_LISTBOX, self.handler, id=id )
+        elif self.style == 'multicol':
             self.ctrl = wx.ListCtrl(parent, id, style = wx.LC_REPORT)
             widths = []
             if len(self.choices) > 1:
@@ -658,13 +679,9 @@ class List(Control):
                     #self.ctrl.InsertColumn(col, label, align, width) 
                 for row in range(1,len(self.choices)):
                     self.ctrl.Append(self.choices[row]) 
-        else:
-            if self.check is True:
-                self.ctrl = wx.CheckListBox( parent, id, self.pos, self.size, self.choices, 0 )
-            else:
-                self.ctrl = wx.ListBox( parent, id, self.pos, self.size, self.choices, 0 )
-            self.ctrl.SetSelection(self.select)
-            self.ctrl.Bind( wx.EVT_LISTBOX, self.handler, id=id )
+        elif self.style == 'edit':
+            self.ctrl = wx.adv.EditableListBox( parent, id, self.label, self.pos, self.size, 0 )
+            #TODO:
         if self.key is not None:
             registerCtrl( self.key, self )
 
@@ -830,6 +847,7 @@ class StyledText(Control):
     Methods Summary
     Properties Summary
     '''
+    import wx.stc    
     def __init__(self,text="",expand=True,proportion=1,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -962,6 +980,7 @@ class Ticker(Control):
     Methods Summary
     Properties Summary
     '''
+    import wx.lib.ticker    
     def __init__(self,text="",fgcolor=wx.BLACK,bgcolor=wx.WHITE,expand=True,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -1027,6 +1046,8 @@ class Tree(Control):
                 node = self.ctrl.AppendItem(parent,item)       
 
 class Web(Control):
+    import wx.lib.iewin
+    import wx.lib.pdfwin
     '''
     Methods Summary
         CanGoBack(self)
@@ -1073,7 +1094,13 @@ class Web(Control):
                 self.ctrl.LoadUrl(self.url)
             if self.key is not None:
                 registerCtrl( self.key, self )
-       
+        if self.engine == 'pdf': #TODO: Do not work now : progID is not defined in PDFWindow.__init__()
+            self.ctrl = wx.lib.pdfwin.PDFWindow( parent, wx.ID_ANY, self.pos, self.size, 0 )
+            if self.url is not None:
+                self.ctrl.LoadFile(self.url)
+            if self.key is not None:
+                registerCtrl( self.key, self )
+
 ######################################################################
 # Dialogs
 ######################################################################
@@ -1137,6 +1164,9 @@ def onProgressDialog(dlg,percent):
 def progressDialogUpdate(dlg,percent):
     wx.CallAfter(onProgressDialog, dlg, percent)
 
+def CalendarDialog(parent=None,year=None,month=None,day=None):
+    dlg = wx.lib.CalenDlg(parent,month,day,year)
+    #TODO
 
 ######################################################################
 # WxApp

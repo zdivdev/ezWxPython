@@ -64,8 +64,6 @@ def onFileBrowse(event):
     if type(files) is list:
         for file in files:
             AppendToText(file)    
-    else:
-        AppendToText(files) 
 
 def onCalendarButton(event):
     ctrl = ezwx.getWxCtrl('calendar') 
@@ -180,6 +178,8 @@ body_def = [
       ezwx.Button("Files", handler=onFileBrowse, key="file_browse" ), ],
     [ ezwx.Check("Check1", handler=onCheck, key='check1'),
       ezwx.Check("Check2", key='check2'), 
+      ezwx.ColorPicker(), 
+      ezwx.FontPicker(), 
       ezwx.Link("Google", "https://www.google.com"), ],
     [ ezwx.Label ("Choices: "), ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
       ezwx.Label ("  ComboBox: "), ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo"),
@@ -187,12 +187,6 @@ body_def = [
       ezwx.Label ("  Time: "), ezwx.Time  (key='time'), ],
     [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=0,handler=onList,key="list"),
       ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=0,handler=onCheckList,check=True,key="checklist"),
-      ezwx.Scroll( [
-          [ezwx.Radio("Group",["Item1","item2","item3"],"item2",handler=onRadio,key='radio')],
-          [ezwx.Button("1")],[ezwx.Button("2")],[ezwx.Button("3")],[ezwx.Button("4")],
-          [ezwx.Button("5")],[ezwx.Button("6")],[ezwx.Button("7")],[ezwx.Button("8")],
-          [ezwx.Button("9")],[ezwx.Button("10")],
-      ], expand=True, proportion=1),
       ezwx.Notebook([
           [
               "StyledText",
@@ -208,9 +202,9 @@ body_def = [
       ezwx.List([[('Name',100,-1),('Sex',32,0),('Age',64,1)], #label, width, align
                    ["Willy","M","32"],
                    ["Jane","F","28"],
-          ], expand=True, proportion=2, multicol=True),
-      ezwx.List(expand=False,proportion=1,label="Editable List", edit=True,key='editlist'),
-      { 'proportion' : 1 }
+          ], expand=True, proportion=2, style='multicol'),
+      ezwx.List(expand=True,proportion=1,label="Editable List", style='edit',key='editlist'),
+      { 'expand' : True, 'proportion' : 1 }
     ],
     [ ezwx.Panel([
         [ ezwx.Button("A"), ezwx.Button("B")], 
@@ -218,7 +212,11 @@ body_def = [
         [ ezwx.Line(expand=True, proportion=1)],
         [ ezwx.Slider(value=20,expand=True, proportion=1, key='slider')],
         [ ezwx.Spin(value=20,expand=True, proportion=1, key='spin')],
-      ]),
+      ], expand=True, proportion=1, label='Panel Demo'),
+      ezwx.Panel( [
+          [ezwx.Radio("Group",["Item1","item2","item3"],"item2",handler=onRadio,key='radio')],
+          [ezwx.Button("1")],[ezwx.Button("2")],[ezwx.Button("3")],[ezwx.Button("4")],
+      ], expand=True, proportion=1, style='scroll'),
       ezwx.Spliter([
           200, #sashpos
           [ 
@@ -236,8 +234,9 @@ body_def = [
                               'Item-3', [ 'Item-3.1', 'Item-3.2', 'Item-3.3' ],
                              ] 
                           ] ,expand=True,proportion=1,key="tree"), 
-                { 'expand' : True, 'proportion' : 1 } ],
-          ],   #panel2
+                 { 'expand' : True, 'proportion' : 1 }
+              ],
+          ],   #panel3
       ], expand=True, proportion=1, style='vertical'),
       { 'expand' : True, 'proportion' : 1 }
     ],

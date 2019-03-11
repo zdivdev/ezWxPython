@@ -152,16 +152,16 @@ def makeLayout(layout,parent):
         hbox = HBox()
         prop = 0
         expand = True
-        for col in row:
-            if type(col) is dict:
-                prop = dictValue( col.get('proportion'), prop )
-                expand = dictValue( col.get('expand'), expand )
-                print( expand )
-            elif col is None:
-                hbox.addSpacer(proportion=1)
-            else:
-                col.create(parent)
-                hbox.add(col.ctrl,proportion=col.proportion,expand=col.expand,border=col.border,align=wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+        if type(row) is list:
+            for col in row:
+                if type(col) is dict:
+                    prop = dictValue( col.get('proportion'), prop )
+                    expand = dictValue( col.get('expand'), expand )
+                elif col is None:
+                    hbox.addSpacer(proportion=1)
+                else:
+                    col.create(parent)
+                    hbox.add(col.ctrl,proportion=col.proportion,expand=col.expand,border=col.border,align=wx.ALIGN_CENTER_VERTICAL|wx.ALL)
         vbox.add(hbox.ctrl,proportion=prop,expand=expand,border=2,align=wx.ALIGN_LEFT|wx.ALL)
     return vbox
 
@@ -286,33 +286,29 @@ class Scroll(Control): #TODO: Change ScrolledWindow -> ScrolledPane
         #panel = Panel(self.layout, self.ctrl, create=True)
         #self.ctrl.SetSizer( wrapSizer(panel.ctrl) )
         self.ctrl.Layout()   
-            
-class Spliter1(Control):
-    def __init__(self,layouts,parent=None,create=False,style='vertical',expand=False,proportion=0,key=None):
-        super().__init__(key,expand,proportion)
-        self.layouts = layouts #left(top),right(bottom)
-        self.style = style
-        if create is True and parent is not None:
-            self.create(parent)
-    def create(self,parent):
-        self.ctrl = wx.SplitterWindow( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SP_3D )
-        #self.ctrl.Bind( wx.EVT_IDLE, self.onIdle )
-        self.sashpos = 0
-        self.panels = []
-        for layout in self.layouts:
-            if type(layout) is int:
-                self.sashpos = layout
-            else:
-                self.panels.append(Panel(layout, self.ctrl, create=True))
-        if self.style == 'vertical':
-            self.ctrl.SplitVertically( self.panels[0].ctrl, self.panels[1].ctrl, self.sashpos )
-        else:
-            self.ctrl.SplitHorizontally( self.panels[0].ctrl, self.panels[1].ctrl, self.sashpos )
-    #def onIdle(self, event):
-    #    self.ctrl.SetSashPosition(self.sashpos)
-    #    self.ctrl.Unbind( wx.EVT_IDLE )    
 
-    
+#use MultiSplitterWindow instead of SplitterWindow             
+#class Spliter1(Control):
+#    def __init__(self,layouts,parent=None,create=False,style='vertical',expand=False,proportion=0,key=None):
+#        super().__init__(key,expand,proportion)
+#        self.layouts = layouts #left(top),right(bottom)
+#        self.style = style
+#        if create is True and parent is not None:
+#            self.create(parent)
+#    def create(self,parent):
+#        self.ctrl = wx.SplitterWindow( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SP_3D )
+#        self.sashpos = 0
+#        self.panels = []
+#        for layout in self.layouts:
+#            if type(layout) is int:
+#                self.sashpos = layout
+#            else:
+#                self.panels.append(Panel(layout, self.ctrl, create=True))
+#        if self.style == 'vertical':
+#            self.ctrl.SplitVertically( self.panels[0].ctrl, self.panels[1].ctrl, self.sashpos )
+#        else:
+#            self.ctrl.SplitHorizontally( self.panels[0].ctrl, self.panels[1].ctrl, self.sashpos )
+
 class Spliter(Control):
     import wx.lib.splitter    
     def __init__(self,layouts,parent=None,create=False,style='vertical',expand=False,proportion=0,key=None):
@@ -664,6 +660,7 @@ class List(Control):
             else:
                 self.ctrl = wx.ListBox( parent, id, self.pos, self.size, self.choices, 0 )
             self.ctrl.SetSelection(self.select)
+            self.ctrl.SetDropTarget(FileDrop(self))                
             self.ctrl.Bind( wx.EVT_LISTBOX, self.handler, id=id )
         elif self.style == 'multicol':
             self.ctrl = wx.ListCtrl(parent, id, style = wx.LC_REPORT)
@@ -684,6 +681,9 @@ class List(Control):
             #TODO:
         if self.key is not None:
             registerCtrl( self.key, self )
+    def drop_handle(self,filenames):
+        for filename in filenames:
+            self.ctrl.Append(filename)
 
 class Picker(Control):
     '''
@@ -864,8 +864,6 @@ class StyledText(Control):
     def drop_handle(self,filenames):
         for filename in filenames:
             self.ctrl.AppendText( filename + '\n' )
-            if self.multiline is False:
-                break
     def enableLineNumber(self):
         #self.stc.SetProperty("fold", "1")
         #self.stc.SetProperty("fold.html", "1")

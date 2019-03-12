@@ -263,29 +263,36 @@ class Panel(Control):
             self.ctrl.Expand()
             self.sizer.ctrl.SetSizeHints(pane)
             pane.Layout()      
-    
 
-class Scroll(Control): #TODO: Change ScrolledWindow -> ScrolledPane
-    def __init__(self,layout,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
-        super().__init__(key,expand,proportion)
-        self.layout = layout 
-        if create is True and parent is not None:
-            self.create(parent)
-    def create(self,parent):
-        self.ctrl = wx.ScrolledWindow( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,  wx.HSCROLL|wx.VSCROLL  )
-        #self.ctrl.EnableScrolling(True,True)        
-        #self.ctrl.SetAutoLayout(1) 
-        #self.ctrl.ShowScrollbars( True, True )
-        self.sizer = makeLayout(self.layout,self.ctrl)
-        self.ctrl.SetSizer( self.sizer.ctrl )
-        width = self.ctrl.GetBestSize().width
-        height = self.ctrl.GetBestSize().height
-        self.ctrl.SetSize((width, height))
-        self.ctrl.SetScrollbars( 1, 1, 1, 1 )     
-        #self.ctrl.SetScrollRate( 5, 5 )
-        #panel = Panel(self.layout, self.ctrl, create=True)
-        #self.ctrl.SetSizer( wrapSizer(panel.ctrl) )
-        self.ctrl.Layout()   
+class ScrolledPanel(Panel):
+    def __init__(self,layout,parent=None,create=False,expand=False,proportion=0,label="",key=None):
+        super().__init__(layout,parent=parent,create=create,expand=expand,proportion=proportion,label=label,style='scroll',key=key)
+
+class CollapsiblePanel(Panel):
+    def __init__(self,layout,parent=None,create=False,expand=False,proportion=0,label="",key=None):
+        super().__init__(layout,parent=parent,create=create,expand=expand,proportion=proportion,label=label,style='collapsible',key=key)
+
+##class Scroll(Control): #TODO: Change ScrolledWindow -> ScrolledPane
+##    def __init__(self,layout,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
+##        super().__init__(key,expand,proportion)
+##        self.layout = layout 
+##        if create is True and parent is not None:
+##            self.create(parent)
+##    def create(self,parent):
+##        self.ctrl = wx.ScrolledWindow( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,  wx.HSCROLL|wx.VSCROLL  )
+##        #self.ctrl.EnableScrolling(True,True)        
+##        #self.ctrl.SetAutoLayout(1) 
+##        #self.ctrl.ShowScrollbars( True, True )
+##        self.sizer = makeLayout(self.layout,self.ctrl)
+##        self.ctrl.SetSizer( self.sizer.ctrl )
+##        width = self.ctrl.GetBestSize().width
+##        height = self.ctrl.GetBestSize().height
+##        self.ctrl.SetSize((width, height))
+##        self.ctrl.SetScrollbars( 1, 1, 1, 1 )     
+##        #self.ctrl.SetScrollRate( 5, 5 )
+##        #panel = Panel(self.layout, self.ctrl, create=True)
+##        #self.ctrl.SetSizer( wrapSizer(panel.ctrl) )
+##        self.ctrl.Layout()   
 
 #use MultiSplitterWindow instead of SplitterWindow             
 #class Spliter1(Control):
@@ -333,6 +340,13 @@ class Spliter(Control):
         for i in range(len(self.panels)):
             self.ctrl.AppendWindow(self.panels[i].ctrl, self.sashpos[i])
 
+class VerticalSpliter(Spliter):
+    def __init__(self,layouts,parent=None,create=False,expand=False,proportion=0,key=None):
+        super().__init__(layouts,parent=parent,create=create,style='vertical',expand=expand,proportion=proportion,key=key)
+
+class HorizontalSpliter(Spliter):
+    def __init__(self,layouts,parent=None,create=False,expand=False,proportion=0,key=None):
+        super().__init__(layouts,parent=parent,create=create,style='horizontal',expand=expand,proportion=proportion,key=key)
         
 ######################################################################
 # Controls
@@ -1183,6 +1197,7 @@ class WxApp():
         if popup is False:
             WxMainWindow = self
             self.app = wx.PySimpleApp()
+            self.app.locale = wx.Locale(wx.Locale.GetSystemLanguage())            
             self.frame = wx.Frame( parent=None, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.Size( width,height ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
             self.frame.Bind(wx.EVT_CLOSE, self.closeEvent)
             registerCtrl( 'WxApp', self )

@@ -55,16 +55,19 @@ def onCopy(event):
 def onBrowse(event):
     folder = ezwx.DirectoryDialog()
     text = ezwx.getWxCtrl('folder')
-    if text is not None:
+    if text is not None and folder is not None:
         text.Clear()
         text.write(folder)    
     
 def onFileBrowse(event):
     files = ezwx.OpenFileDialog()
-    if type(files) is list:
-        for file in files:
-            AppendToText(file)    
-
+    if files is not None:
+        if type(files) is list:
+            for file in files:
+                AppendToText(file)    
+        else: 
+            AppendToText(files)
+                
 def onCalendarButton(event):
     ctrl = ezwx.getWxCtrl('calendar') 
     date = ctrl.GetDate()
@@ -213,11 +216,11 @@ body_def = [
         [ ezwx.Slider(value=20,expand=True, proportion=1, key='slider')],
         [ ezwx.Spin(value=20,expand=True, proportion=1, key='spin')],
       ], expand=True, proportion=1, label='Panel Demo'),
-      ezwx.Panel( [
+      ezwx.ScrolledPanel( [
           [ezwx.Radio("Group",["Item1","item2","item3"],"item2",handler=onRadio,key='radio')],
           [ezwx.Button("1")],[ezwx.Button("2")],[ezwx.Button("3")],[ezwx.Button("4")],
-      ], expand=True, proportion=1, style='scroll'),
-      ezwx.Spliter([
+      ], expand=True, proportion=1),
+      ezwx.VerticalSpliter([
           200, #sashpos
           [ 
               [ ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap")],
@@ -237,7 +240,7 @@ body_def = [
                  { 'expand' : True, 'proportion' : 1 }
               ],
           ],   #panel3
-      ], expand=True, proportion=1, style='vertical'),
+      ], expand=True, proportion=1),
       { 'expand' : True, 'proportion' : 1 }
     ],
     [ None,    #Insert Spacer with proportion 1 

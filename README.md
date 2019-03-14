@@ -167,6 +167,8 @@ Generated Form.
 * TextArea with Drag and Drop files
 * Support Popup window which can be created same way as main window.
 * Fixed size and dynamic size support for controls.
+* ArtProvider Icon Support
+* StaticBoxSizer Support
 
 ### Implemented Controls
 
@@ -199,6 +201,8 @@ Generated Form.
 * Panel : wx.Panel, wx.CollapsiblePane
 * Splitter : wx.SplitterWindow, wx.lib.splitter.MultiSplitterWindow
 * Scroll : wx.ScrolledWindow
+
+* VBox, HBox : BoxSiver, StaticBoxSizer
 
 ### Implemented Dialogs
 

@@ -34,10 +34,10 @@ def getWxCtrl(name):
         return CtrlTable[name].ctrl
     else:
         return None
-    
+
 def getWxTimer(name):
     return getCtrl(name)
-    
+
 def getWxAppCtrl():
     global CtrlTable
     name = 'WxApp'
@@ -45,14 +45,14 @@ def getWxAppCtrl():
         return CtrlTable[name].ctrl
     else:
         return None
-    
+
 def encodeIcon(filename):
     from zlib import compress
     from base64 import b64encode
     with open(filename, "rb") as f:
         data = b64encode(compress(f.read()))
     return data
-    
+
 def decodeIcon(data):
     from base64 import b64decode
     from zlib import decompress
@@ -66,56 +66,125 @@ def getBitmap(data):
     image = wx.Image(stream, wx.BITMAP_TYPE_ANY) # wx.ImageFromStream for legacy wx
     bitmap = wx.Bitmap(image) # wx.BitmapFromImage for legacy wx
     return bitmap
-    
+
+def getMenuBitmap(data, size=(16,16)):
+    if data[0] == b'w'[0] and data[1] == b'x'[0]:
+        return wx.ArtProvider.GetBitmap(data, wx.ART_MENU, size)
+    else:
+        return getBitmap(data)
+
+def getToolbarBitmap(data, size=(32,32)):
+    '''
+    wx.ART_ADD_BOOKMARK
+    wx.ART_CDROM
+    wx.ART_CLOSE
+    wx.ART_COPY
+    wx.ART_CROSS_MARK
+    wx.ART_CUT
+    wx.ART_DELETE
+    wx.ART_DEL_BOOKMARK
+    wx.ART_ERROR
+    wx.ART_EXECUTABLE_FILE
+    wx.ART_FILE_OPEN
+    wx.ART_FILE_SAVE
+    wx.ART_FILE_SAVE_AS
+    wx.ART_FIND
+    wx.ART_FIND_AND_REPLACE
+    wx.ART_FLOPPY
+    wx.ART_FOLDER
+    wx.ART_FOLDER_OPEN
+    wx.ART_GOTO_FIRST (since 2.9.2)
+    wx.ART_GOTO_LAST (since 2.9.2)
+    wx.ART_GO_BACK
+    wx.ART_GO_DIR_UP
+    wx.ART_GO_DOWN
+    wx.ART_GO_FORWARD
+    wx.ART_GO_HOME
+    wx.ART_GO_TO_PARENT
+    wx.ART_GO_UP
+    wx.ART_HARDDISK
+    wx.ART_HELP
+    wx.ART_HELP_BOOK
+    wx.ART_HELP_FOLDER
+    wx.ART_HELP_PAGE
+    wx.ART_HELP_SETTINGS
+    wx.ART_HELP_SIDE_PANEL
+    wx.ART_INFORMATION
+    wx.ART_LIST_VIEW
+    wx.ART_MINUS (since 2.9.2)
+    wx.ART_MISSING_IMAGE
+    wx.ART_NEW
+    wx.ART_NEW_DIR
+    wx.ART_NORMAL_FILE
+    wx.ART_PASTE
+    wx.ART_PLUS (since 2.9.2)
+    wx.ART_PRINT
+    wx.ART_QUESTION
+    wx.ART_QUIT
+    wx.ART_REDO
+    wx.ART_REPORT_VIEW
+    wx.ART_TICK_MARK
+    wx.ART_TIP
+    wx.ART_UNDO
+    wx.ART_WARNING
+    '''
+    if data[0] == b'w'[0] and data[1] == b'x'[0]:
+        return wx.ArtProvider.GetBitmap(data, wx.ART_TOOLBAR, size)
+    else:
+        return getBitmap(data)
+
 def threadHandle(handler,start=False,key=None,daemon=True,args=()):
-    #from threading import *        
+    #from threading import *
     import threading
     thread = threading.Thread(target=handler,args=args)
-    thread.daemon = daemon 
+    thread.daemon = daemon
     if key is not None:
-        registerCtrl(key,thread)        
+        registerCtrl(key,thread)
     if start is True:
         thread.start()
-        
+
 def threadStart(key):
     thread = getCtrl(key)
     if thread is not None:
         thread.start()
-        
+
 def threadJoin(key):
     thread = getCtrl(key)
     if thread is not None:
         thread.join()
-  
+
 def callAfter(handler,*args):
     wx.CallAfter(handler,*args)
-   
+
 def doBusyJob(job,args=(),message="Please wait ...",parent=None,bgColor=None,fgColor=None):
     import wx.lib.busy
     with wx.lib.busy.BusyInfo(message,parent,bgColor,fgColor):
         job(args)
 
-        
+
 ######################################################################
 # Layouts
 ######################################################################
- 
+
 class VBox():
-    def __init__(self,orient=wx.VERTICAL,proportion=0):
-        self.ctrl = wx.BoxSizer( orient )
-    
-    def add(self,child,proportion=0,expand=True,border=0,align=0):
+    def __init__(self,parent=None,label=None,orient=wx.VERTICAL,proportion=0):
+        if label is None:
+            self.ctrl = wx.BoxSizer( orient )
+        else:
+            self.ctrl = wx.StaticBoxSizer( wx.StaticBox( parent, wx.ID_ANY, label ), orient )
+
+    def add(self,child,proportion=0,expand=True,border=5,align=0):
         flags = align
         flags |= wx.EXPAND if expand == True else 0
-        flags |= wx.ALL if border > 0 else 0            
-        self.ctrl.Add( child, proportion, flags, border ) 
-        
+        flags |= wx.ALL if border > 0 else 0
+        self.ctrl.Add( child, proportion, flags, border )
+
     def addSpacer(self,proportion=1):
         self.ctrl.Add( ( 0, 0), proportion, wx.EXPAND|wx.ALL, 5 )
-    
+
 class HBox(VBox):
-    def __init__(self,orient=wx.HORIZONTAL,proportion=0):
-        super().__init__(orient,proportion)
+    def __init__(self,parent=None,label=None,orient=wx.HORIZONTAL,proportion=0):
+        super().__init__(parent,label,orient,proportion)
         pass
 
 class Control():
@@ -123,9 +192,9 @@ class Control():
         self.ctrl = None
         self.key = key
         self.expand = expand
-        self.proportion = proportion    
-        self.size = size    
-        self.pos = pos    
+        self.proportion = proportion
+        self.size = size
+        self.pos = pos
         self.border=2
 
 ######################################################################
@@ -145,11 +214,21 @@ def dictValue(new_value,old_value):
     except:
         pass
     return old_value
-    
+
 def makeLayout(layout,parent):
-    vbox = VBox()
+    if type(layout) is not list:
+        return VBox();
+    vbox_label = None;
+    if type(layout[0]) is str:
+        vbox_label = layout[0]
+        layout.remove(layout[0])
+    vbox = VBox(parent,vbox_label)
     for row in layout:
-        hbox = HBox()
+        hbox_label = None;
+        if type(row[0]) is str:
+            hbox_label = row[0]
+            row.remove(row[0])
+        hbox = HBox(parent,hbox_label)        
         prop = 0
         expand = True
         if type(row) is list:
@@ -165,24 +244,24 @@ def makeLayout(layout,parent):
         vbox.add(hbox.ctrl,proportion=prop,expand=expand,border=2,align=wx.ALIGN_LEFT|wx.ALL)
     return vbox
 
-class Book(Control): 
+class Book(Control):
     '''
-    wx.SHOW_EFFECT_NONE	No effect, equivalent to normal wx.Window.Show or Hide() call.
-    wx.SHOW_EFFECT_ROLL_TO_LEFT	Roll window to the left.
-    wx.SHOW_EFFECT_ROLL_TO_RIGHT	Roll window to the right.
-    wx.SHOW_EFFECT_ROLL_TO_TOP	Roll window to the top.
-    wx.SHOW_EFFECT_ROLL_TO_BOTTOM	Roll window to the bottom.
-    wx.SHOW_EFFECT_SLIDE_TO_LEFT	Slide window to the left.
-    wx.SHOW_EFFECT_SLIDE_TO_RIGHT	Slide window to the right.
-    wx.SHOW_EFFECT_SLIDE_TO_TOP	Slide window to the top.
-    wx.SHOW_EFFECT_SLIDE_TO_BOTTOM	Slide window to the bottom.
-    wx.SHOW_EFFECT_BLEND	Fade in or out effect.
-    wx.SHOW_EFFECT_EXPAND	Expanding or collapsing effect.
-    wx.SHOW_EFFECT_MAX    
+    wx.SHOW_EFFECT_NONE No effect, equivalent to normal wx.Window.Show or Hide() call.
+    wx.SHOW_EFFECT_ROLL_TO_LEFT Roll window to the left.
+    wx.SHOW_EFFECT_ROLL_TO_RIGHT Roll window to the right.
+    wx.SHOW_EFFECT_ROLL_TO_TOP Roll window to the top.
+    wx.SHOW_EFFECT_ROLL_TO_BOTTOM Roll window to the bottom.
+    wx.SHOW_EFFECT_SLIDE_TO_LEFT Slide window to the left.
+    wx.SHOW_EFFECT_SLIDE_TO_RIGHT Slide window to the right.
+    wx.SHOW_EFFECT_SLIDE_TO_TOP Slide window to the top.
+    wx.SHOW_EFFECT_SLIDE_TO_BOTTOM Slide window to the bottom.
+    wx.SHOW_EFFECT_BLEND Fade in or out effect.
+    wx.SHOW_EFFECT_EXPAND Expanding or collapsing effect.
+    wx.SHOW_EFFECT_MAX
     '''
     def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,style='note',key=None):
         super().__init__(key,expand,proportion)
-        self.layouts = layouts 
+        self.layouts = layouts
         self.style = style
         self.simplePages = []
         if create is True and parent is not None:
@@ -194,7 +273,19 @@ class Book(Control):
             self.ctrl = wx.Choicebook( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         else: #simple
             self.ctrl = wx.Simplebook( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.titles = []
         self.panels = []
+        for layout in self.layouts:
+            if type(layout) == str:
+                self.titles.append(layout)
+            elif type(layout) == list:
+                self.panels.append(Panel(layout, self.ctrl, create=True))
+        for i in range(len(self.panels)):
+            if self.style == 'simple':
+                self.simplePages.append(self.panels[i].ctrl);
+            else:
+                self.ctrl.AddPage( self.panels[i].ctrl, self.titles[i], False )              
+        '''
         for layout in self.layouts:
             title = layout[0]
             layout.remove(title)
@@ -203,6 +294,7 @@ class Book(Control):
                 self.simplePages.append(panel.ctrl);
             else:
                 self.ctrl.AddPage( panel.ctrl, title, False )
+        '''
         if self.style == 'simple':
             self.setPage(0)
     def setEffect(self,):
@@ -214,15 +306,15 @@ class Book(Control):
                 index = 0
             self.ctrl.ShowNewPage(self.simplePages[index])
 
-class Notebook(Book): 
+class Notebook(Book):
     def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
         super().__init__(layouts,parent,create,horizontal,expand,proportion,style='note',key=key)
 
-class Choicebook(Book): 
+class Choicebook(Book):
     def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
         super().__init__(layouts,parent,create,horizontal,expand,proportion,style='choice',key=key)
 
-class Simplebook(Book): 
+class Simplebook(Book):
     def __init__(self,layouts,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
         super().__init__(layouts,parent,create,horizontal,expand,proportion,style='simple',key=key)
 
@@ -240,7 +332,7 @@ class Panel(Control):
             self.ctrl = wx.Panel( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
             self.sizer = makeLayout(self.layout,self.ctrl)
             self.ctrl.SetSizer( self.sizer.ctrl )
-            self.ctrl.Layout()      
+            self.ctrl.Layout()
         elif self.style == 'scroll':
             self.ctrl = wx.lib.scrolledpanel.ScrolledPanel( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL|wx.TAB_TRAVERSAL )
             self.sizer = makeLayout(self.layout,self.ctrl)
@@ -251,10 +343,10 @@ class Panel(Control):
             width = self.ctrl.GetBestSize().width
             height = self.ctrl.GetBestSize().height
             self.ctrl.SetSize((width, height))
-            self.ctrl.SetScrollbars( 1, 1, 1, 1 )              
+            self.ctrl.SetScrollbars( 1, 1, 1, 1 )
             self.sizer.ctrl.SetSizeHints(self.ctrl)
             #end
-            self.ctrl.Layout()          
+            self.ctrl.Layout()
         elif self.style == 'collapsible':
             self.ctrl = wx.CollapsiblePane( parent, wx.ID_ANY, self.label, wx.DefaultPosition, wx.DefaultSize, wx.CP_DEFAULT_STYLE|wx.CP_NO_TLW_RESIZE )
             pane = self.ctrl.GetPane()
@@ -262,7 +354,7 @@ class Panel(Control):
             pane.SetSizer( self.sizer.ctrl )
             self.ctrl.Expand()
             self.sizer.ctrl.SetSizeHints(pane)
-            pane.Layout()      
+            pane.Layout()
 
 class ScrolledPanel(Panel):
     def __init__(self,layout,parent=None,create=False,expand=False,proportion=0,label="",key=None):
@@ -275,26 +367,26 @@ class CollapsiblePanel(Panel):
 ##class Scroll(Control): #TODO: Change ScrolledWindow -> ScrolledPane
 ##    def __init__(self,layout,parent=None,create=False,horizontal=True,expand=False,proportion=0,key=None):
 ##        super().__init__(key,expand,proportion)
-##        self.layout = layout 
+##        self.layout = layout
 ##        if create is True and parent is not None:
 ##            self.create(parent)
 ##    def create(self,parent):
 ##        self.ctrl = wx.ScrolledWindow( parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,  wx.HSCROLL|wx.VSCROLL  )
-##        #self.ctrl.EnableScrolling(True,True)        
-##        #self.ctrl.SetAutoLayout(1) 
+##        #self.ctrl.EnableScrolling(True,True)
+##        #self.ctrl.SetAutoLayout(1)
 ##        #self.ctrl.ShowScrollbars( True, True )
 ##        self.sizer = makeLayout(self.layout,self.ctrl)
 ##        self.ctrl.SetSizer( self.sizer.ctrl )
 ##        width = self.ctrl.GetBestSize().width
 ##        height = self.ctrl.GetBestSize().height
 ##        self.ctrl.SetSize((width, height))
-##        self.ctrl.SetScrollbars( 1, 1, 1, 1 )     
+##        self.ctrl.SetScrollbars( 1, 1, 1, 1 )
 ##        #self.ctrl.SetScrollRate( 5, 5 )
 ##        #panel = Panel(self.layout, self.ctrl, create=True)
 ##        #self.ctrl.SetSizer( wrapSizer(panel.ctrl) )
-##        self.ctrl.Layout()   
+##        self.ctrl.Layout()
 
-#use MultiSplitterWindow instead of SplitterWindow             
+#use MultiSplitterWindow instead of SplitterWindow
 #class Spliter1(Control):
 #    def __init__(self,layouts,parent=None,create=False,style='vertical',expand=False,proportion=0,key=None):
 #        super().__init__(key,expand,proportion)
@@ -317,7 +409,7 @@ class CollapsiblePanel(Panel):
 #            self.ctrl.SplitHorizontally( self.panels[0].ctrl, self.panels[1].ctrl, self.sashpos )
 
 class Spliter(Control):
-    import wx.lib.splitter    
+    import wx.lib.splitter
     def __init__(self,layouts,parent=None,create=False,style='vertical',expand=False,proportion=0,key=None):
         super().__init__(key,expand,proportion)
         self.layouts = layouts #left(top),right(bottom)
@@ -347,7 +439,7 @@ class VerticalSpliter(Spliter):
 class HorizontalSpliter(Spliter):
     def __init__(self,layouts,parent=None,create=False,expand=False,proportion=0,key=None):
         super().__init__(layouts,parent=parent,create=create,style='horizontal',expand=expand,proportion=proportion,key=key)
-        
+
 ######################################################################
 # Controls
 ######################################################################
@@ -359,7 +451,7 @@ class FileDrop(wx.FileDropTarget):
     def OnDropFiles(self, x, y, filenames):
         self.window.drop_handle(filenames)
         return True
-    
+
 class Bitmap(Control):
     '''
     Methods Summary
@@ -392,7 +484,7 @@ class Button(Control):
         super().__init__(key,expand,proportion,size,pos)
         self.label = label
         self.handler = handler
-    def create(self,parent):        
+    def create(self,parent):
         id = getId()
         self.ctrl = wx.Button( parent, id, self.label, self.pos, self.size, 0 )
         self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
@@ -408,11 +500,11 @@ class Calendar(Control):
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
         self.date = date
-    def create(self,parent):  
+    def create(self,parent):
         self.ctrl = wx.adv.CalendarCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, self.pos, self.size, wx.adv.TP_DEFAULT )
         if self.key is not None:
             registerCtrl( self.key, self )
-        
+
 class Check(Control):
     '''
     Methods Summary
@@ -423,13 +515,13 @@ class Check(Control):
         super().__init__(key,expand,proportion,size,pos)
         self.label = label
         self.handler = handler
-    def create(self,parent):        
+    def create(self,parent):
         id = getId()
         self.ctrl = wx.CheckBox( parent, id, self.label, self.pos, self.size, 0 )
         self.ctrl.Bind( wx.EVT_CHECKBOX, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
-                  
+
 class Choice(Control):
     '''
     Methods Summary
@@ -441,7 +533,7 @@ class Choice(Control):
         self.choices = choices
         self.select = select
         self.handler = handler
-    def create(self,parent):        
+    def create(self,parent):
         id = getId()
         self.ctrl = wx.Choice( parent, id, self.pos, self.size, self.choices, 0 )
         self.ctrl.SetSelection(self.select)
@@ -454,19 +546,19 @@ class Combo(Control):
     Methods Summary
     Properties Summary
     '''
-    def __init__(self,choices=[],value="",handler=None,expand=False,proportion=0, 
+    def __init__(self,choices=[],value="",handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
         self.choices = choices
         self.value = value
         self.handler = handler
-    def create(self,parent):        
+    def create(self,parent):
         id = getId()
         self.ctrl = wx.ComboBox( parent, id, self.value, self.pos, self.size, self.choices, 0 )
         self.ctrl.Bind( wx.EVT_COMBOBOX, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
-     
+
 class Date(Control):
     '''
     Methods Summary
@@ -476,7 +568,7 @@ class Date(Control):
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
         self.date = date
-    def create(self,parent):  
+    def create(self,parent):
         self.ctrl = wx.adv.DatePickerCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, self.pos, self.size, wx.adv.TP_DEFAULT )
         if self.key is not None:
             registerCtrl( self.key, self )
@@ -498,7 +590,7 @@ class Label(Control):
         self.ctrl = wx.StaticText( parent, wx.ID_ANY, self.text, self.pos, self.size, 0|flags )
         if self.key is not None:
             registerCtrl( self.key, self )
-    
+
 class Line(Control):
     '''
     Methods Summary
@@ -513,7 +605,7 @@ class Line(Control):
         self.ctrl = wx.StaticLine( parent, wx.ID_ANY, self.pos, self.size, 0|flags )
         if self.key is not None:
             registerCtrl( self.key, self )
-     
+
 class Link(Control):
     '''
     Methods Summary
@@ -528,7 +620,7 @@ class Link(Control):
         self.ctrl = wx.adv.HyperlinkCtrl( parent, wx.ID_ANY, self.text, self.url, self.pos, self.size)
         if self.key is not None:
             registerCtrl( self.key, self )
-            
+
 class List(Control):
     '''
     Methods Summary: ListBox
@@ -665,7 +757,7 @@ class List(Control):
         self.check = check
         self.label = label
         self.style = style
-    def create(self,parent):    
+    def create(self,parent):
         import sys
         id = getId()
         if self.style is None:
@@ -674,7 +766,7 @@ class List(Control):
             else:
                 self.ctrl = wx.ListBox( parent, id, self.pos, self.size, self.choices, 0 )
             self.ctrl.SetSelection(self.select)
-            self.ctrl.SetDropTarget(FileDrop(self))                
+            self.ctrl.SetDropTarget(FileDrop(self))
             self.ctrl.Bind( wx.EVT_LISTBOX, self.handler, id=id )
         elif self.style == 'multicol':
             self.ctrl = wx.ListCtrl(parent, id, style = wx.LC_REPORT)
@@ -686,10 +778,10 @@ class List(Control):
                     label = self.choices[0][col][0]
                     width = self.choices[0][col][1]
                     align = aligns[self.choices[0][col][2]+1]
-                    self.ctrl.AppendColumn(label, align, width) 
-                    #self.ctrl.InsertColumn(col, label, align, width) 
+                    self.ctrl.AppendColumn(label, align, width)
+                    #self.ctrl.InsertColumn(col, label, align, width)
                 for row in range(1,len(self.choices)):
-                    self.ctrl.Append(self.choices[row]) 
+                    self.ctrl.Append(self.choices[row])
         elif self.style == 'edit':
             self.ctrl = wx.adv.EditableListBox( parent, id, self.label, self.pos, self.size, 0 )
             #TODO:
@@ -710,7 +802,7 @@ class Picker(Control):
         self.style = style
         self.value = value
         self.handler = handler
-    def create(self,parent):    
+    def create(self,parent):
         id = getId()
         if self.style == 'dir': #value: path str
             self.value = "" if self.value is None else self.value
@@ -720,7 +812,7 @@ class Picker(Control):
             self.value = "" if self.value is None else self.value
             self.ctrl = wx.FilePickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.FLP_DEFAULT_STYLE )
             self.ctrl.Bind( wx.EVT_FILEPICKER_CHANGED, self.handler, id=id )
-        elif self.style == 'color': 
+        elif self.style == 'color':
             self.value = wx.BLACK if self.value is None else self.value
             self.ctrl = wx.ColourPickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.CLRP_DEFAULT_STYLE )
             self.ctrl.Bind( wx.EVT_COLOURPICKER_CHANGED, self.handler, id=id )
@@ -737,10 +829,10 @@ class Picker(Control):
             self.ctrl = wx.adv.TimePickerCtrl( parent, id, self.value, pos=self.pos, size=self.size, style=wx.adv.TP_DEFAULT )
             self.ctrl.Bind( wx.adv.EVT_TIME_CHANGED, self.handler, id=id )
         else: #TODO: throw exception
-            pass 
+            pass
         if self.key is not None:
             registerCtrl( self.key, self )
-            
+
 class DirPicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
@@ -750,12 +842,12 @@ class FilePicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__('file',value,handler,expand,proportion,size,pos,key)
-               
+
 class ColorPicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__('color',value,handler,expand,proportion,size,pos,key)
-        
+
 class FontPicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
@@ -765,12 +857,12 @@ class DatePicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__('date',value,handler,expand,proportion,size,pos,key)
-       
+
 class TimePicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__('time',value,handler,expand,proportion,size,pos,key)
-                           
+
 class Progress(Control):
     '''
     Methods Summary
@@ -790,7 +882,7 @@ class Progress(Control):
         wx.CallAfter(self.callAfter, percent)
     def callAfter(self,percent):
         self.ctrl.SetValue(percent)
-    
+
 class Radio(Control):
     '''
     Methods Summary
@@ -804,7 +896,7 @@ class Radio(Control):
         self.value = value
         self.handler = handler
         self.style = wx.RA_SPECIFY_ROWS if style == 'row' else wx.RA_SPECIFY_COLS
-    def create(self,parent):        
+    def create(self,parent):
         id = getId()
         self.ctrl = wx.RadioBox( parent, id, self.label, self.pos, self.size, self.choices, 0, self.style )
         self.ctrl.Bind( wx.EVT_RADIOBOX, self.handler, id=id )
@@ -814,7 +906,7 @@ class Radio(Control):
                 break
         if self.key is not None:
             registerCtrl( self.key, self )
-            
+
 class Slider(Control):
     '''
     Methods Summary
@@ -835,7 +927,7 @@ class Slider(Control):
         self.ctrl.Bind( wx.EVT_SLIDER, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
-   
+
 class Spin(Control):
     '''
     Methods Summary
@@ -855,13 +947,13 @@ class Spin(Control):
         self.ctrl.Bind( wx.EVT_SPIN, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
-            
+
 class StyledText(Control):
     '''
     Methods Summary
     Properties Summary
     '''
-    import wx.stc    
+    import wx.stc
     def __init__(self,text="",expand=True,proportion=1,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
@@ -887,7 +979,7 @@ class StyledText(Control):
         self.ctrl.SetMarginSensitive(2, True)
         self.ctrl.SetMarginWidth(1, 32) # 2,25
         self.ctrl.SetMarginWidth(2, 16) # 2,25
-        
+
 class Text(Control):
     '''
     Methods Summary: TextEntry
@@ -986,20 +1078,20 @@ class Text(Control):
             self.ctrl.AppendText( filename + '\n' )
             if self.multiline is False:
                 break
-           
+
 class Ticker(Control):
     '''
     Methods Summary
     Properties Summary
     '''
-    import wx.lib.ticker    
+    import wx.lib.ticker
     def __init__(self,text="",fgcolor=wx.BLACK,bgcolor=wx.WHITE,expand=True,proportion=0,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
         self.text = text
         self.fgcolor = fgcolor
         self.bgcolor = bgcolor
-    def create(self,parent):  
+    def create(self,parent):
         self.ctrl = wx.lib.ticker.Ticker( parent, wx.ID_ANY, self.text, self.fgcolor, self.bgcolor, True, pos=self.pos, size=self.size, style=wx.NO_BORDER )
         self.ctrl.Bind(wx.EVT_CLOSE, self.onClose)
         if self.key is not None:
@@ -1007,7 +1099,7 @@ class Ticker(Control):
     def onClose(self,event):
         self.ctrl.Stop()
         event.Skip()
-    
+
 class Time(Control):
     '''
     Methods Summary
@@ -1017,13 +1109,13 @@ class Time(Control):
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key,expand,proportion,size,pos)
         self.date = date
-    def create(self,parent):  
+    def create(self,parent):
         self.ctrl = wx.adv.TimePickerCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, self.pos, self.size, wx.adv.TP_DEFAULT )
         if self.key is not None:
             registerCtrl( self.key, self )
-       
-        
-class Tree(Control): 
+
+
+class Tree(Control):
     '''
     Methods Summary
         AppendText(self, text)
@@ -1037,7 +1129,7 @@ class Tree(Control):
         self.data = data
         self.collapse = collapse
         self.handler = handler
-    def create(self,parent):  
+    def create(self,parent):
         id = getId()
         self.ctrl = wx.TreeCtrl( parent, id, self.pos, self.size, wx.TR_DEFAULT_STYLE )
         self.ctrl.Bind( wx.EVT_TREE_SEL_CHANGED, self.handler, id=id )
@@ -1048,14 +1140,14 @@ class Tree(Control):
             if self.collapse is not True:
                 self.ctrl.ExpandAllChildren(root)
         if self.key is not None:
-            registerCtrl( self.key, self )            
+            registerCtrl( self.key, self )
     def addItems(self,parent,data):
         node = None
         for item in data:
             if type(item) is list and node is not None:
                 self.addItems(node,item)
             else: #list
-                node = self.ctrl.AppendItem(parent,item)       
+                node = self.ctrl.AppendItem(parent,item)
 
 class Web(Control):
     import wx.lib.iewin
@@ -1082,17 +1174,17 @@ class Web(Control):
         PrintPreview(self)
         Quit(self)
         RefreshPage(self, Level=REFRESH_NORMAL)
-        Stop(self)    
+        Stop(self)
     Properties Summary
-        busy	 
-        document	 
-        locationname	 
-        locationurl	 
-        offline	 
-        readystate	 
-        registerasbrowser	 
-        registerasdroptarget	 
-        silent	 
+        busy
+        document
+        locationname
+        locationurl
+        offline
+        readystate
+        registerasbrowser
+        registerasdroptarget
+        silent
         type
     '''
     def __init__(self,url=None,engine='ie',expand=False,proportion=0,size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
@@ -1116,7 +1208,7 @@ class Web(Control):
 ######################################################################
 # Dialogs
 ######################################################################
-            
+
 def OpenFileDialog(defaultDir="",multiple=False,save=False):
     style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST if save is False else wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
     style |= wx.FD_MULTIPLE if multiple is True else 0
@@ -1132,7 +1224,7 @@ def OpenFileDialog(defaultDir="",multiple=False,save=False):
             return os.path.join(dlg.GetDirectory(), dlg.GetFilename())
     else:
         return None
-    
+
 def SaveFileDialog(defaultDir=""):
     return OpenFileDialog(defaultDir=defaultDir, multiple=False, save=True)
 
@@ -1145,28 +1237,28 @@ def DirectoryDialog(defaultPath=""):
         return None
 
 def MessageBox(title,message):
-    dlg = wx.MessageDialog(None, message, caption=title, style=wx.OK|wx.CENTER, pos=wx.DefaultPosition)    
+    dlg = wx.MessageDialog(None, message, caption=title, style=wx.OK|wx.CENTER, pos=wx.DefaultPosition)
     dlg.ShowModal()
-    
+
 def MessageYesNo(title,message):
-    dlg = wx.MessageDialog(None, message, caption=title, style=wx.YES|wx.NO|wx.CENTER, pos=wx.DefaultPosition)     
+    dlg = wx.MessageDialog(None, message, caption=title, style=wx.YES|wx.NO|wx.CENTER, pos=wx.DefaultPosition)
     rv = dlg.ShowModal()
     if rv == wx.ID_OK or rv == wx.ID_YES:
         return True
-    else: #wx.ID_CANCEL, wx.ID_NO 
+    else: #wx.ID_CANCEL, wx.ID_NO
         return False
-    
+
 def MessageYesNoCancel(title,message):
-    dlg = wx.MessageDialog(None, message, caption=title, style=wx.YES|wx.NO|wx.CANCEL|wx.CENTER, pos=wx.DefaultPosition)     
+    dlg = wx.MessageDialog(None, message, caption=title, style=wx.YES|wx.NO|wx.CANCEL|wx.CENTER, pos=wx.DefaultPosition)
     rv = dlg.ShowModal()
     if rv == wx.ID_OK or rv == wx.ID_YES:
         return True
     elif rv == wx.ID_NO:
         return False
-    else: #wx.ID_CANCEL, 
+    else: #wx.ID_CANCEL,
         return None
-        
-def ProgressDialog(title,message,maxValue=100): 
+
+def ProgressDialog(title,message,maxValue=100):
     dlg = wx.ProgressDialog(title, message, maximum=100, parent=None, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE)
     return dlg
 
@@ -1197,24 +1289,24 @@ class WxApp():
         if popup is False:
             WxMainWindow = self
             self.app = wx.PySimpleApp()
-            self.app.locale = wx.Locale(wx.Locale.GetSystemLanguage())            
+            self.app.locale = wx.Locale(wx.Locale.GetSystemLanguage())
             self.frame = wx.Frame( parent=None, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.Size( width,height ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
             self.frame.Bind(wx.EVT_CLOSE, self.closeEvent)
             registerCtrl( 'WxApp', self )
         else:
             self.frame = wx.Frame( parent=None, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.Size( width,height ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         self.frame.Bind(wx.EVT_SHOW, self.openEvent)
-        self.frame.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize ) 
+        self.frame.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.openHandler = None
         self.closeHandler = None
-            
+
     def run(self):
         self.frame.Show()
         self.app.MainLoop()
-    
+
     def close(self):
         self.frame.Close()
-        
+
     def Show(self):
         self.frame.Show()
 
@@ -1224,20 +1316,20 @@ class WxApp():
             self.openHandler = None
         self.frame.Unbind(wx.EVT_SHOW)
         event.Skip()
-        
+
     def openHandle(self,handler):
         self.openHandler = handler
-        
+
     def closeEvent(self,event):
         if self.closeHandler is not None:
             if self.closeHandler(event) == True:
                 event.Skip()
         else:
             event.Skip()
-          
+
     def closeHandle(self,handler):
         self.closeHandler = handler
-     
+
     def idleHandle(self,handler):
         self.frame.Bind(wx.EVT_IDLE, handler)
 
@@ -1248,17 +1340,17 @@ class WxApp():
             registerCtrl(key,timer)
         if start is True and interval > 0:
             timer.Start(interval)
-            
+
     def timerStart(key,interval):
         timer = getWxTimer(key)
         if timer is not None and interval > 0:
             timer.Start(interval)
-        
+
     def timerStop(key):
         timer = getWxTimer(key)
         if timer is not None:
             timer.Stop()
-            
+
     def makeMenu(self, value):
         menu = wx.Menu()
         for k, v in value.items():
@@ -1272,19 +1364,19 @@ class WxApp():
                     if type(v) is list:
                         handler = v[0]
                         icon = v[1]
-                    else: 
+                    else:
                         handler = v
                         icon = None
                     item = wx.MenuItem( menu, getId(), k, wx.EmptyString, wx.ITEM_NORMAL )
                     if icon is not None:
-                        item.SetBitmap(getBitmap(icon))
+                        item.SetBitmap(getMenuBitmap(icon))
                     if handler is None:
                         item.Enable( False )
                     else:
                         self.frame.Bind(wx.EVT_MENU, handler, item)
                     menu.Append(item)
         return menu
-    
+
     def makeMenuBar(self, menu_def):
         self.menubar = wx.MenuBar(0)
         for key, value in menu_def.items():
@@ -1292,7 +1384,7 @@ class WxApp():
                 menu = self.makeMenu(value)
                 self.menubar.Append( menu, key )
         self.frame.SetMenuBar(self.menubar)
-            
+
     def makeStatusBar(self, status_def):
         self.statusbar = self.frame.CreateStatusBar( len(status_def), wx.STB_SIZEGRIP, wx.ID_ANY )
         widths = []
@@ -1300,7 +1392,7 @@ class WxApp():
             self.statusbar.SetStatusText( status_def[i][0], i)
             widths.append(status_def[i][1])
         self.statusbar.SetStatusWidths(widths)
-            
+
     def makeToolBar(self, tool_def):  #icon, text, handler
         flags = wx.TB_FLAT|wx.TB_HORIZONTAL
         if len(tool_def[0]) == 3:
@@ -1315,22 +1407,22 @@ class WxApp():
                     handler = value[1]
                 if len(value) == 3:
                     text = value[2]
-                icon = getBitmap(value[0])
+                icon = getToolbarBitmap(value[0])
                 id = getId()
                 if flags & wx.TB_TEXT:
                     tool = self.toolbar.AddLabelTool( id, text, icon, wx.NullBitmap, wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString, None )
                 else:
                     tool = self.toolbar.AddSimpleTool( id, icon, wx.EmptyString, wx.EmptyString, None )
                 if handler is None:
-                    tool.Enable( False )               
-                else:    
+                    tool.Enable( False )
+                else:
                     self.toolbar.Bind( wx.EVT_TOOL, handler, id = id )
         self.toolbar.Realize()
 
     def makeBody(self,body_def):
         self.panel = Panel(body_def,self.frame,create=True)
         self.frame.SetSizer( wrapSizer(self.panel.ctrl) )
-        self.frame.Layout()          
+        self.frame.Layout()
 
     def makeLayout(self,layout):
         if 'menu' in layout:

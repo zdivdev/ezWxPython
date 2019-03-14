@@ -202,6 +202,8 @@ Generated Form.
 * Splitter : wx.SplitterWindow, wx.lib.splitter.MultiSplitterWindow
 * Scroll : wx.ScrolledWindow
 
+### Implemented Sizers
+
 * VBox, HBox : BoxSiver, StaticBoxSizer
 
 ### Implemented Dialogs

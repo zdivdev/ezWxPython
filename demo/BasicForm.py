@@ -175,29 +175,32 @@ status_def = [
 ]
 
 body_def = [
+    "ezWxPython Layout Demo",
     [ ezwx.Label ("Folder: "), 
       ezwx.Text  ("Default Text",key="folder",expand=True,password=True,proportion=1), 
       ezwx.Button("Folder", handler=onBrowse, key="browse"),
       ezwx.Button("Files", handler=onFileBrowse, key="file_browse" ), ],
-    [ ezwx.Check("Check1", handler=onCheck, key='check1'),
+    [ "Group1",
+      ezwx.Check("Check1", handler=onCheck, key='check1'),
       ezwx.Check("Check2", key='check2'), 
       ezwx.ColorPicker(), 
       ezwx.FontPicker(), 
       ezwx.Link("Google", "https://www.google.com"), ],
-    [ ezwx.Label ("Choices: "), ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
+    [ "Group2",
+      ezwx.Label ("Choices: "), ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
       ezwx.Label ("  ComboBox: "), ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo"),
       ezwx.Label ("  Date: "), ezwx.Date  (key='date'),
       ezwx.Label ("  Time: "), ezwx.Time  (key='time'), ],
     [ ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=0,handler=onList,key="list"),
       ezwx.List  (['apple','orange','grape'],2,expand=True,proportion=0,handler=onCheckList,check=True,key="checklist"),
       ezwx.Notebook([
+          "StyledText", #notebook title1
           [
-              "StyledText",
               [ ezwx.StyledText ("Default\nMulti Line\nText",expand=True,proportion=1,key="stc"),
                 { 'expand' : True, 'proportion' : 1 } ],
           ],      
+          "Text", #notebook title2
           [
-              "Text",
               [ ezwx.Text  ("Default\nMulti Line\nText",expand=True,proportion=1,multiline=True,key="text"), 
                 { 'expand' : True, 'proportion' : 1 } ],
           ],
@@ -210,6 +213,7 @@ body_def = [
       { 'expand' : True, 'proportion' : 1 }
     ],
     [ ezwx.Panel([
+        "Panel Demo",
         [ ezwx.Button("A"), ezwx.Button("B")], 
         [ ezwx.Ticker("This is a ticker example text", expand=True, proportion=1, key='ticker')],
         [ ezwx.Line(expand=True, proportion=1)],
@@ -221,16 +225,17 @@ body_def = [
           [ezwx.Button("1")],[ezwx.Button("2")],[ezwx.Button("3")],[ezwx.Button("4")],
       ], expand=True, proportion=1),
       ezwx.VerticalSpliter([
-          200, #sashpos
-          [ 
+          200, #sashpos1
+          [ #panel1
+              "Lenna Image",
               [ ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap")],
-          ],   #panel1
-          240,
-          [
+          ],   
+          240, #sashpos2
+          [ #panel2
               [ ezwx.Calendar(key='calendar',expand=True,proportion=1)],
-          ],   #panel2
-          160,
-          [
+          ],   
+          160, #sashpos3
+          [ #panel3
               [ ezwx.Tree( [ 'Root', 
                              ['Item-1', [ 'Item-1.1', 'Item-1.2' ],
                               'Item-2', 
@@ -239,7 +244,7 @@ body_def = [
                           ] ,expand=True,proportion=1,key="tree"), 
                  { 'expand' : True, 'proportion' : 1 }
               ],
-          ],   #panel3
+          ],  
       ], expand=True, proportion=1),
       { 'expand' : True, 'proportion' : 1 }
     ],

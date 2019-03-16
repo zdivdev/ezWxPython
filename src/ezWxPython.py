@@ -74,65 +74,70 @@ def getMenuBitmap(data, size=(16,16)):
         return getBitmap(data)
 
 def getToolbarBitmap(data, size=(32,32)):
-    '''
-    wx.ART_ADD_BOOKMARK
-    wx.ART_CDROM
-    wx.ART_CLOSE
-    wx.ART_COPY
-    wx.ART_CROSS_MARK
-    wx.ART_CUT
-    wx.ART_DELETE
-    wx.ART_DEL_BOOKMARK
-    wx.ART_ERROR
-    wx.ART_EXECUTABLE_FILE
-    wx.ART_FILE_OPEN
-    wx.ART_FILE_SAVE
-    wx.ART_FILE_SAVE_AS
-    wx.ART_FIND
-    wx.ART_FIND_AND_REPLACE
-    wx.ART_FLOPPY
-    wx.ART_FOLDER
-    wx.ART_FOLDER_OPEN
-    wx.ART_GOTO_FIRST (since 2.9.2)
-    wx.ART_GOTO_LAST (since 2.9.2)
-    wx.ART_GO_BACK
-    wx.ART_GO_DIR_UP
-    wx.ART_GO_DOWN
-    wx.ART_GO_FORWARD
-    wx.ART_GO_HOME
-    wx.ART_GO_TO_PARENT
-    wx.ART_GO_UP
-    wx.ART_HARDDISK
-    wx.ART_HELP
-    wx.ART_HELP_BOOK
-    wx.ART_HELP_FOLDER
-    wx.ART_HELP_PAGE
-    wx.ART_HELP_SETTINGS
-    wx.ART_HELP_SIDE_PANEL
-    wx.ART_INFORMATION
-    wx.ART_LIST_VIEW
-    wx.ART_MINUS (since 2.9.2)
-    wx.ART_MISSING_IMAGE
-    wx.ART_NEW
-    wx.ART_NEW_DIR
-    wx.ART_NORMAL_FILE
-    wx.ART_PASTE
-    wx.ART_PLUS (since 2.9.2)
-    wx.ART_PRINT
-    wx.ART_QUESTION
-    wx.ART_QUIT
-    wx.ART_REDO
-    wx.ART_REPORT_VIEW
-    wx.ART_TICK_MARK
-    wx.ART_TIP
-    wx.ART_UNDO
-    wx.ART_WARNING
-    '''
     if data[0] == b'w'[0] and data[1] == b'x'[0]:
         return wx.ArtProvider.GetBitmap(data, wx.ART_TOOLBAR, size)
     else:
         return getBitmap(data)
 
+def getButtonBitmap(data, size=(16,16)):
+    if data[0] == b'w'[0] and data[1] == b'x'[0]:
+        return wx.ArtProvider.GetBitmap(data, wx.ART_BUTTON, size)
+    else:
+        return getBitmap(data)
+
+#wx.ART_ADD_BOOKMARK
+#wx.ART_CDROM
+#wx.ART_CLOSE
+#wx.ART_COPY
+#wx.ART_CROSS_MARK
+#wx.ART_CUT
+#wx.ART_DELETE
+#wx.ART_DEL_BOOKMARK
+#wx.ART_ERROR
+#wx.ART_EXECUTABLE_FILE
+#wx.ART_FILE_OPEN
+#wx.ART_FILE_SAVE
+#wx.ART_FILE_SAVE_AS
+#wx.ART_FIND
+#wx.ART_FIND_AND_REPLACE
+#wx.ART_FLOPPY
+#wx.ART_FOLDER
+#wx.ART_FOLDER_OPEN
+#wx.ART_GOTO_FIRST (since 2.9.2)
+#wx.ART_GOTO_LAST (since 2.9.2)
+#wx.ART_GO_BACK
+#wx.ART_GO_DIR_UP
+#wx.ART_GO_DOWN
+#wx.ART_GO_FORWARD
+#wx.ART_GO_HOME
+#wx.ART_GO_TO_PARENT
+#wx.ART_GO_UP
+#wx.ART_HARDDISK
+#wx.ART_HELP
+#wx.ART_HELP_BOOK
+#wx.ART_HELP_FOLDER
+#wx.ART_HELP_PAGE
+#wx.ART_HELP_SETTINGS
+#wx.ART_HELP_SIDE_PANEL
+#wx.ART_INFORMATION
+#wx.ART_LIST_VIEW
+#wx.ART_MINUS (since 2.9.2)
+#wx.ART_MISSING_IMAGE
+#wx.ART_NEW
+#wx.ART_NEW_DIR
+#wx.ART_NORMAL_FILE
+#wx.ART_PASTE
+#wx.ART_PLUS (since 2.9.2)
+#wx.ART_PRINT
+#wx.ART_QUESTION
+#wx.ART_QUIT
+#wx.ART_REDO
+#wx.ART_REPORT_VIEW
+#wx.ART_TICK_MARK
+#wx.ART_TIP
+#wx.ART_UNDO
+#wx.ART_WARNING
+        
 def threadHandle(handler,start=False,key=None,daemon=True,args=()):
     #from threading import *
     import threading
@@ -486,7 +491,10 @@ class Button(Control):
         self.handler = handler
     def create(self,parent):
         id = getId()
-        self.ctrl = wx.Button( parent, id, self.label, self.pos, self.size, 0 )
+        if type(self.label) is str: 
+            self.ctrl = wx.Button( parent, id, self.label, self.pos, self.size, 0 )
+        else:
+            self.ctrl = wx.BitmapButton( parent, id, getButtonBitmap(self.label), self.pos, self.size, 0 )
         self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )

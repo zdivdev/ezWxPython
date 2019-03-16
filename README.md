@@ -173,7 +173,7 @@ Generated Form.
 ### Implemented Controls
 
 * Bitmap : wx.StaticBitmap
-* Button : wx.Button
+* Button : wx.Button, wx.BitmapButton
 * Calendar : wx.CalendarCtrl
 * Check : wx.CheckBox
 * Choice : wx.ChoiceBox

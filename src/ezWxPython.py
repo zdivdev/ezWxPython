@@ -1159,7 +1159,6 @@ class Tree(Control):
 
 class Web(Control):
     import wx.lib.iewin
-    import wx.lib.pdfwin
     '''
     Methods Summary
         CanGoBack(self)
@@ -1206,12 +1205,51 @@ class Web(Control):
                 self.ctrl.LoadUrl(self.url)
             if self.key is not None:
                 registerCtrl( self.key, self )
-        if self.engine == 'pdf': #TODO: Do not work now : progID is not defined in PDFWindow.__init__()
-            self.ctrl = wx.lib.pdfwin.PDFWindow( parent, wx.ID_ANY, self.pos, self.size, 0 )
-            if self.url is not None:
-                self.ctrl.LoadFile(self.url)
-            if self.key is not None:
-                registerCtrl( self.key, self )
+                
+class PdfWin(Control):
+    import wx.lib.pdfwin
+    def __init__(self,url=None,expand=False,proportion=0,size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__(key,expand,proportion,size,pos)
+        self.url = url
+    def create(self,parent):
+        self.ctrl = wx.lib.pdfwin.PDFWindow( parent, wx.ID_ANY, self.pos, self.size, 0 )
+        if self.url is not None:
+            self.ctrl.LoadFile(self.url)
+        if self.key is not None:
+            registerCtrl( self.key, self )
+
+class PdfView(Control):
+    import wx.lib.pdfviewer
+    def __init__(self,url=None,expand=False,proportion=0,size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__(key,expand,proportion,size,pos)
+        self.url = url
+    def create(self,parent):
+        self.ctrl = wx.lib.pdfviewer.pdfViewer( parent, wx.ID_ANY, self.pos, self.size, wx.HSCROLL|wx.VSCROLL|wx.SUNKEN_BORDER )
+        #self.ctrl.SetSizerProps(expand=True, proportion=1)
+        #self.buttonpanel = wx.lib.pdfviewer.pdfButtonPanel(parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0)
+        #self.buttonpanel.SetSizerProps(expand=True)
+        #self.buttonpanel.viewer = self.ctrl
+        #self.ctrl.buttonpanel = self.buttonpanel            
+        if self.url is not None:
+            self.ctrl.LoadFile(self.url)
+        if self.key is not None:
+            registerCtrl( self.key, self )
+                
+class Media(Control):
+    import wx.media
+    def __init__(self,url=None,expand=False,proportion=0,size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__(key,expand,proportion,size,pos)
+        self.url = url
+    def create(self,parent):
+        self.ctrl = wx.media.MediaCtrl( parent, wx.ID_ANY, szBackend=wx.media.MEDIABACKEND_WMP10, pos=self.pos, size=self.size )
+        self.ctrl.Bind(wx.media.EVT_MEDIA_LOADED, self.onLoaded)
+        if self.url is not None:
+            self.ctrl.Load(self.url)
+        if self.key is not None:
+            registerCtrl( self.key, self )
+    def onLoaded(self,event):
+        self.ctrl.Play()
+
 
 ######################################################################
 # Dialogs

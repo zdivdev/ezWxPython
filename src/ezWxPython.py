@@ -139,9 +139,10 @@ class HBox(VBox):
         pass
 
 class Control():
-    def __init__(self,key=None,expand=False,proportion=0,size=wx.DefaultSize,pos=wx.DefaultPosition,border=2):
+    def __init__(self,key=None,expand=False,proportion=0,size=wx.DefaultSize,pos=wx.DefaultPosition,border=2,tooltip=None):
         self.ctrl = None
         self.key = key
+        self.tooltip = tooltip
         self.expand = expand
         self.proportion = proportion
         self.size = size
@@ -381,8 +382,8 @@ class FileDrop(wx.FileDropTarget):
 
 class Bitmap(Control):
     def __init__(self,filename=None,bitmap=None,expand=False,proportion=0,
-                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
-        super().__init__(key,expand,proportion,size,pos)
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None):
+        super().__init__(key,expand,proportion,size,pos,tooltip)
         self.bitmap = bitmap
         self.filename = filename
     def create(self,parent):
@@ -399,8 +400,8 @@ class Bitmap(Control):
 
 class Button(Control):
     def __init__(self,label="",handler=None,expand=False,proportion=0,
-                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
-        super().__init__(key,expand,proportion,size,pos)
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None):
+        super().__init__(key,expand,proportion,size,pos,tooltip=tooltip)
         self.label = label
         self.handler = handler
     def create(self,parent):
@@ -410,6 +411,8 @@ class Button(Control):
         else:
             self.ctrl = wx.BitmapButton( parent, id, getButtonBitmap(self.label), self.pos, self.size, 0 )
         self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
+        if self.tooltip is not None:
+            self.ctrl.SetToolTip(wx.ToolTip(self.tooltip))
         if self.key is not None:
             registerCtrl( self.key, self )
 
@@ -477,8 +480,8 @@ class Date(Control):
 
 class Label(Control):
     def __init__(self,text="",expand=False,proportion=0,multiline=False,
-                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
-        super().__init__(key,expand,proportion,size,pos)
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None):
+        super().__init__(key,expand,proportion,size,pos,tooltip=tooltip)
         self.text = text
         self.multiline = multiline
     def create(self,parent):
@@ -486,6 +489,8 @@ class Label(Control):
         if self.multiline == True:
             flags |= wx.TE_MULTILINE
         self.ctrl = wx.StaticText( parent, wx.ID_ANY, self.text, self.pos, self.size, 0|flags )
+        if self.tooltip is not None:
+            self.ctrl.SetToolTip(wx.ToolTip(self.tooltip))
         if self.key is not None:
             registerCtrl( self.key, self )
 
@@ -502,12 +507,14 @@ class Line(Control):
 
 class Link(Control):
     def __init__(self,text="",url="",expand=False,proportion=0,
-                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
-        super().__init__(key,expand,proportion,size,pos)
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None):
+        super().__init__(key,expand,proportion,size,pos,tooltip=tooltip)
         self.text = text
         self.url = url
     def create(self,parent):
         self.ctrl = wx.adv.HyperlinkCtrl( parent, wx.ID_ANY, self.text, self.url, self.pos, self.size)
+        if self.tooltip is not None:
+            self.ctrl.SetToolTip(wx.ToolTip(self.tooltip))
         if self.key is not None:
             registerCtrl( self.key, self )
 
@@ -950,12 +957,16 @@ class WxApp():
             registerCtrl( 'WxApp', self )
         else:
             self.frame = wx.Frame( parent=None, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.Size( width,height ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+            self.frame.Bind(wx.EVT_CLOSE, self.popupCloseEvent)
+        self.frame.Center();
         self.frame.Bind(wx.EVT_SHOW, self.openEvent)
         self.frame.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
         self.openHandler = None
         self.closeHandler = None
+        self.lastMousePos = wx.Point(0,0)
 
     def run(self):
+        self.frame.Center()
         self.frame.Show()
         self.app.MainLoop()
 
@@ -976,6 +987,14 @@ class WxApp():
         self.openHandler = handler
 
     def closeEvent(self,event):
+        if self.closeHandler is not None:
+            if self.closeHandler(event) == True:
+                event.Skip()
+        else:
+            event.Skip()
+
+    def popupCloseEvent(self,event):
+        self.makeModal(False)
         if self.closeHandler is not None:
             if self.closeHandler(event) == True:
                 event.Skip()
@@ -1050,24 +1069,28 @@ class WxApp():
 
     def makeToolBar(self, tool_def):  #icon, text, handler
         flags = wx.TB_FLAT|wx.TB_HORIZONTAL
-        if len(tool_def[0]) == 3:
+        if len(tool_def[0]) >= 3:
             flags |= wx.TB_TEXT
         self.toolbar = self.frame.CreateToolBar( flags, wx.ID_ANY )
         for value in tool_def:
             if value[0] is None:
                 self.toolbar.AddSeparator()
             else:
-                text = handler = None
+                text = handler = tooltip = None
                 if len(value) >= 2:
                     handler = value[1]
-                if len(value) == 3:
+                if len(value) >= 3:
                     text = value[2]
+                if len(value) >= 4:
+                    tooltip = value[3]
                 icon = getToolbarBitmap(value[0])
                 id = getId()
-                if flags & wx.TB_TEXT:
+                if text is not None:
                     tool = self.toolbar.AddTool( id, text, icon, wx.NullBitmap, wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString, None )
                 else:
                     tool = self.toolbar.AddSimpleTool( id, icon, wx.EmptyString, wx.EmptyString, None )
+                if tooltip is not None:
+                    self.toolbar.SetToolShortHelp(id, tooltip);
                 if handler is None:
                     tool.Enable( False )
                 else:
@@ -1088,6 +1111,82 @@ class WxApp():
             self.makeStatusBar(layout['status'])
         if 'body' in layout:
             self.makeBody(layout['body'])
+
+                        
+    def makeModal(self, modal=True):
+        if modal and not hasattr(self.frame, '_disabler'):
+            self.frame._disabler = wx.WindowDisabler(self.frame)
+        if not modal and hasattr(self.frame, '_disabler'):
+            del self.frame._disabler
+
+    def noMinimize(self, modal=True):
+        style = self.frame.GetWindowStyle()
+        self.frame.SetWindowStyle(style & (~wx.MINIMIZE_BOX))
+        self.frame.Refresh()
+
+    def noMaximize(self, modal=True):
+        style = self.frame.GetWindowStyle()
+        self.frame.SetWindowStyle(style & (~wx.MAXIMIZE_BOX))
+        self.frame.Refresh()
+
+    def NoClose(self, modal=True):
+        style = self.frame.GetWindowStyle()
+        self.frame.SetWindowStyle(style & (~wx.CLOSE_BOX))
+        self.frame.Refresh()
+        
+    def noResize(self, modal=True):
+        style = self.frame.GetWindowStyle()
+        self.frame.SetWindowStyle(style & (~wx.RESIZE_BORDER))
+        self.frame.Refresh()
+
+    def noSystemMenu(self, modal=True):
+        style = self.frame.GetWindowStyle()
+        self.frame.SetWindowStyle(style & (~wx.SYSTEM_MENU))
+        self.frame.Refresh()
+
+    def noCaption(self, modal=True):
+        style = self.frame.GetWindowStyle()
+        self.frame.SetWindowStyle(style & (~wx.CAPTION))
+        self.frame.Refresh()
+          
+    def noBorder(self, modal=True):
+        style = self.frame.GetWindowStyle()
+        self.frame.SetWindowStyle(style & (~wx.BORDER))
+        self.frame.Refresh()
+                  
+    def _dragMotionHandle(self, event):
+        if event.LeftIsDown():
+            windowX = self.lastMousePos[0]
+            windowY = self.lastMousePos[1]
+            screenX = wx.GetMousePosition()[0]
+            screenY = wx.GetMousePosition()[1]
+            self.frame.Move(wx.Point(screenX - windowX, screenY - windowY))
+        event.Skip()
+
+    def _dragLeftDownHandle(self, event):
+        self.lastMousePos = event.GetPosition()
+        event.Skip()
+          
+    def dragEnable(self,key):
+        ctrl = getWxCtrl(key)
+        if ctrl is not None:
+            ctrl.Bind(wx.EVT_MOTION, self._dragMotionHandle)
+            ctrl.Bind(wx.EVT_LEFT_DOWN, self._dragLeftDownHandle)
+
+    def _getContextMenuHandler(self,menu):
+        def _contextMenuRightDown(event):
+            self.frame.PopupMenu( menu, event.GetPosition() )
+        return _contextMenuRightDown
+        
+    def contextMenu(self,menu_def,key):
+        ctrl = getWxCtrl(key)
+        if ctrl is not None:
+            ctrl.Bind(wx.EVT_RIGHT_DOWN, self._getContextMenuHandler(self.makeMenu(menu_def)))
+
+    def toolTip(self,text,key):
+        ctrl = getWxCtrl(key)
+        if ctrl is not None:
+            ctrl.SetToolTip(wx.ToolTip(text))
 
 class WxPopup(WxApp):
     def __init__( self, title, width=800, height=600 ):

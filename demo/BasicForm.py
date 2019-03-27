@@ -126,6 +126,15 @@ def onRadio(event):
 # Popup
 ######################################################################
 
+popup_window = None
+
+def onPopupExit(event):
+    popup_window.close()
+    
+popup_menu_def = { 
+    "Exit" : [onPopupExit, None],  # Menu item with base64-encoded icon image
+}
+
 popup_body_def = [
     [ ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap"),      
       { 'proportion' : 1 } ],
@@ -136,9 +145,19 @@ popup_layout = {
 }
 
 def onImageViewButton(event):
-    window = ezwx.WxPopup(u"ezwxApp", 600, 480)
-    window.makeLayout(popup_layout)
-    window.Show()
+    global popup_window
+    popup_window = ezwx.WxPopup(u"ezwxApp", 600, 480)
+    popup_window.makeLayout(popup_layout)
+    #window.NoMinimize()
+    #window.NoMaximize()
+    popup_window.noResize()
+    popup_window.noCaption()
+    popup_window.noBorder()
+    popup_window.dragEnable(key='bitmap')
+    popup_window.contextMenu(popup_menu_def, key='bitmap')
+    popup_window.toolTip("Popup Test Image", key='bitmap')
+    popup_window.makeModal()
+    popup_window.Show()
 
 ######################################################################
 # Layout
@@ -163,7 +182,7 @@ menu_def = {
 }
 
 tool_def = [ #icon, text, handler
-    [exit_png, onExit, "Exit" ],
+    [exit_png, onExit, "Exit", "Close Window" ],
     [None],                         # Tool separator
     [save_png, None, "Save", ],     # Disabled toolbar item
 ]
@@ -180,14 +199,12 @@ body_def = [
       ezwx.Text  ("Default Text",key="folder",expand=True,password=True,proportion=1), 
       ezwx.Button("Folder", handler=onBrowse, key="browse"),
       ezwx.Button("Files", handler=onFileBrowse, key="file_browse" ), ],
-    [ "Group1",
-      ezwx.Check("Check1", handler=onCheck, key='check1'),
+    [ ezwx.Check("Check1", handler=onCheck, key='check1'),
       ezwx.Check("Check2", key='check2'), 
       ezwx.ColorPicker(), 
       ezwx.FontPicker(), 
       ezwx.Link("Google", "https://www.google.com"), ],
-    [ "Group2",
-      ezwx.Label ("Choices: "), ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
+    [ ezwx.Label ("Choices: "), ezwx.Choice(['apple','orange','grape'],0,handler=onChoice,key="choice"),
       ezwx.Label ("  ComboBox: "), ezwx.Combo (['apple','orange','grape'],"orange",handler=onCombo,key="combo"),
       ezwx.Label ("  Date: "), ezwx.Date  (key='date'),
       ezwx.Label ("  Time: "), ezwx.Time  (key='time'), ],
@@ -228,7 +245,8 @@ body_def = [
           200, #sashpos1
           [ #panel1
               "Lenna Image",
-              [ ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap")],
+              [ "Lenna Image II",
+                ezwx.Bitmap(filename="D:\\Lenna.png",expand=True,proportion=1,key="bitmap")],
           ],   
           240, #sashpos2
           [ #panel2
@@ -249,7 +267,7 @@ body_def = [
       { 'expand' : True, 'proportion' : 1 }
     ],
     [ None,    #Insert Spacer with proportion 1 
-      ezwx.Button("ImageView", handler=onImageViewButton),
+      ezwx.Button("ImageView", handler=onImageViewButton,tooltip="Show Popup Window"),
       ezwx.Button("Calendar", handler=onCalendarButton),
       ezwx.Button("Date", handler=onDateButton),
       ezwx.Button("Time", handler=onTimeButton),

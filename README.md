@@ -169,6 +169,10 @@ Generated Form.
 * Fixed size and dynamic size support for controls.
 * ArtProvider Icon Support
 * StaticBoxSizer Support
+* Tooltip support
+* ContextMenu support
+* Custom PopupWin supports Modal
+* Window Caption Hide : Maximize, Minimize, Close, Titlebar ...
 
 ### Implemented Controls
 
@@ -219,8 +223,6 @@ Generated Form.
 
 ## Todo
 
-* Tooltip support
-* ContextMenu support
 * More controls support
 * More Containers and Sizers support
 * Command shell interface

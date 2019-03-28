@@ -173,6 +173,7 @@ Generated Form.
 * ContextMenu support
 * Custom PopupWin supports Modal
 * Window Caption Hide : Maximize, Minimize, Close, Titlebar ...
+* Drag Frame by Control 
 
 ### Implemented Controls
 

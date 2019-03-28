@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import wx
 import wx.adv
 
@@ -480,14 +481,17 @@ class Date(Control):
 
 class Label(Control):
     def __init__(self,text="",expand=False,proportion=0,multiline=False,
-                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None):
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None,align='center'):
         super().__init__(key,expand,proportion,size,pos,tooltip=tooltip)
         self.text = text
         self.multiline = multiline
+        self.align = align
     def create(self,parent):
-        flags = 0
-        if self.multiline == True:
-            flags |= wx.TE_MULTILINE
+        flags = wx.ALIGN_CENTER 
+        if self.align == 'left': flags = wx.ALIGN_LEFT
+        if self.align == 'right': flags = wx.ALIGN_RIGHT
+        flags |= wx.ALIGN_CENTER_VERTICAL
+        if self.multiline == True: flags |= wx.TE_MULTILINE
         self.ctrl = wx.StaticText( parent, wx.ID_ANY, self.text, self.pos, self.size, 0|flags )
         if self.tooltip is not None:
             self.ctrl.SetToolTip(wx.ToolTip(self.tooltip))
@@ -868,7 +872,7 @@ class Media(Control):
 
 
 ######################################################################
-# Dialogs
+# Dialogs : deprecated use wxApp.*
 ######################################################################
 
 def OpenFileDialog(defaultDir="",multiple=False,save=False):
@@ -964,6 +968,8 @@ class WxApp():
         self.openHandler = None
         self.closeHandler = None
         self.lastMousePos = wx.Point(0,0)
+        self.menubar = None #8328
+        self.statusbar = None #8328
 
     def run(self):
         self.frame.Center()
@@ -993,13 +999,9 @@ class WxApp():
         else:
             event.Skip()
 
-    def popupCloseEvent(self,event):
-        self.makeModal(False)
-        if self.closeHandler is not None:
-            if self.closeHandler(event) == True:
-                event.Skip()
-        else:
-            event.Skip()
+    def popupCloseEvent(self,event): #8327
+        self.makeModal(False) 
+        self.closeHandler(event)  #2018.03.28
 
     def closeHandle(self,handler):
         self.closeHandler = handler
@@ -1111,83 +1113,146 @@ class WxApp():
             self.makeStatusBar(layout['status'])
         if 'body' in layout:
             self.makeBody(layout['body'])
-
-                        
-    def makeModal(self, modal=True):
+        
+    def makeModal(self, modal=True): #8327
         if modal and not hasattr(self.frame, '_disabler'):
             self.frame._disabler = wx.WindowDisabler(self.frame)
         if not modal and hasattr(self.frame, '_disabler'):
             del self.frame._disabler
 
-    def noMinimize(self, modal=True):
+    def noMinimize(self): #8327
         style = self.frame.GetWindowStyle()
         self.frame.SetWindowStyle(style & (~wx.MINIMIZE_BOX))
         self.frame.Refresh()
 
-    def noMaximize(self, modal=True):
+    def noMaximize(self): #8327
         style = self.frame.GetWindowStyle()
         self.frame.SetWindowStyle(style & (~wx.MAXIMIZE_BOX))
         self.frame.Refresh()
 
-    def NoClose(self, modal=True):
+    def NoClose(self): #8327
         style = self.frame.GetWindowStyle()
         self.frame.SetWindowStyle(style & (~wx.CLOSE_BOX))
         self.frame.Refresh()
         
-    def noResize(self, modal=True):
+    def noResize(self): #8327
         style = self.frame.GetWindowStyle()
         self.frame.SetWindowStyle(style & (~wx.RESIZE_BORDER))
         self.frame.Refresh()
 
-    def noSystemMenu(self, modal=True):
+    def noSystemMenu(self): #8327
         style = self.frame.GetWindowStyle()
         self.frame.SetWindowStyle(style & (~wx.SYSTEM_MENU))
         self.frame.Refresh()
 
-    def noCaption(self, modal=True):
+    def noCaption(self): #8327
         style = self.frame.GetWindowStyle()
         self.frame.SetWindowStyle(style & (~wx.CAPTION))
         self.frame.Refresh()
           
-    def noBorder(self, modal=True):
+    def noBorder(self): #8327
         style = self.frame.GetWindowStyle()
         self.frame.SetWindowStyle(style & (~wx.BORDER))
         self.frame.Refresh()
-                  
-    def _dragMotionHandle(self, event):
+
+    def _dragMotionHandle(self, event): #8327
         if event.LeftIsDown():
-            windowX = self.lastMousePos[0]
-            windowY = self.lastMousePos[1]
-            screenX = wx.GetMousePosition()[0]
-            screenY = wx.GetMousePosition()[1]
-            self.frame.Move(wx.Point(screenX - windowX, screenY - windowY))
+            currMousePos = wx.GetMousePosition()
+            dx = currMousePos[0] - self.lastMousePos[0]
+            dy = currMousePos[1] - self.lastMousePos[1]
+            self.frame.Move(wx.Point(self.lastWinPos[0] + dx, self.lastWinPos[1] + dy))
         event.Skip()
 
-    def _dragLeftDownHandle(self, event):
-        self.lastMousePos = event.GetPosition()
+    def _dragLeftDownHandle(self, event): #8327
+        self.lastWinPos = self.frame.GetScreenPosition()
+        self.lastMousePos = wx.GetMousePosition()
         event.Skip()
-          
-    def dragEnable(self,key):
+
+    def dragEnable(self,key): #8327
         ctrl = getWxCtrl(key)
         if ctrl is not None:
             ctrl.Bind(wx.EVT_MOTION, self._dragMotionHandle)
             ctrl.Bind(wx.EVT_LEFT_DOWN, self._dragLeftDownHandle)
 
-    def _getContextMenuHandler(self,menu):
+    def _getContextMenuHandler(self,menu): #8327
         def _contextMenuRightDown(event):
             self.frame.PopupMenu( menu, event.GetPosition() )
         return _contextMenuRightDown
-        
-    def contextMenu(self,menu_def,key):
+
+    def contextMenu(self,menu_def,key): #8327
         ctrl = getWxCtrl(key)
         if ctrl is not None:
             ctrl.Bind(wx.EVT_RIGHT_DOWN, self._getContextMenuHandler(self.makeMenu(menu_def)))
 
-    def toolTip(self,text,key):
+    def toolTip(self,text,key): #8327
         ctrl = getWxCtrl(key)
         if ctrl is not None:
             ctrl.SetToolTip(wx.ToolTip(text))
 
+    def setStatusText(self,text,index=0): #8328
+        if self.statusbar is not None:
+            if index < self.statusbar.GetFieldsCount():
+                self.statusbar.SetStatusText(text,index)
+
+    def openFileDialog(defaultDir="",multiple=False,save=False):  #8328
+        style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST if save is False else wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+        style |= wx.FD_MULTIPLE if multiple is True else 0
+        dlg = wx.FileDialog(None,defaultDir=defaultDir,style=style)
+        rv = dlg.ShowModal()
+        if rv == wx.ID_OK:
+            if multiple == True:
+                files = []
+                for file in dlg.GetFilenames():
+                    files.append( os.path.join(dlg.GetDirectory(), file) )
+                return files
+            else:
+                return os.path.join(dlg.GetDirectory(), dlg.GetFilename())
+        else:
+            return None
+
+    def saveFileDialog(defaultDir=""):  #8328
+        return OpenFileDialog(defaultDir=defaultDir, multiple=False, save=True)
+
+    def directoryDialog(defaultPath=""):  #8328
+        dlg = wx.DirDialog(None,defaultPath=defaultPath)
+        rv = dlg.ShowModal()
+        if rv == wx.ID_OK:
+            return dlg.GetPath()
+        else:
+            return None
+
+    def messageBox(self,title,message):  #8328
+        dlg = wx.MessageDialog(self.frame, message, caption=title, style=wx.OK|wx.CENTER, pos=wx.DefaultPosition)
+        dlg.ShowModal()
+
+    def messageYesNo(self,title,message):  #8328
+        dlg = wx.MessageDialog(self.frame, message, caption=title, style=wx.YES|wx.NO|wx.CENTER, pos=wx.DefaultPosition)
+        rv = dlg.ShowModal()
+        if rv == wx.ID_OK or rv == wx.ID_YES:
+            return True
+        else:
+            return False
+
+    def messageYesNoCancel(self,title,message):  #8328
+        dlg = wx.MessageDialog(self.frame, message, caption=title, style=wx.YES|wx.NO|wx.CANCEL|wx.CENTER, pos=wx.DefaultPosition)
+        rv = dlg.ShowModal()
+        if rv == wx.ID_OK or rv == wx.ID_YES:
+            return True
+        elif rv == wx.ID_NO:
+            return False
+        else: #wx.ID_CANCEL,
+            return None
+
+    def progressDialog(self,title,message,maxValue=100):  #8328
+        dlg = wx.ProgressDialog(title, message, maximum=100, parent=self.frame, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE)
+        return dlg
+
+    def onProgressDialog(self,dlg,percent):  #8328
+        dlg.Update(percent)
+
+    def progressDialogUpdate(self,dlg,percent):  #8328
+        wx.CallAfter(self.onProgressDialog, dlg, percent)
+                
 class WxPopup(WxApp):
     def __init__( self, title, width=800, height=600 ):
         super().__init__( title, width=width, height=height, popup=True )

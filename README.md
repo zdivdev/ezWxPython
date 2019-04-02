@@ -185,6 +185,7 @@ Generated Form.
 * Clock : wx.lib.analogclock.analogclock.AnalogClock
 * Combo : wx.ComboBox
 * Date : wx.DatePickerCtrl -> moved to Picker
+* Gauge : wx.Gauge (same as Progress)
 * Label : wx.StaticText
 * LedNumber : wx.lib.gizmos.ledctrl.LEDNumberCtrl
 * Line : wx.StaticLine

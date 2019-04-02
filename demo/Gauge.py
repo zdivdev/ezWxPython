@@ -8,7 +8,7 @@ import ezWxPython as ezwx
 # Global 
 ######################################################################
 
-title = u"Progress Dialog Demo"
+title = u"Gauge Demo"
 window = None
 
 def setStatusText(text,index=0):
@@ -31,12 +31,15 @@ def onAbout(event):
     ezwx.MessageBox("About", title + "\nzdiv")
    
 def threadProgress(progress):
-    for i in range(0,101):
-        ezwx.progressDialogUpdate(progress,i)
-        time.sleep(0.05)
+    for i in range(0,301):
+        #if i % 50 == 49:
+        #    progress.pulse()
+        progress.update(i)
+        time.sleep(0.01)
 
 def onButton(event):
-    progress = ezwx.ProgressDialog("Progress","Progress Dialog Demo")
+    progress = ezwx.getCtrl('progress')
+    progress.setMaxValue(300)
     thread = threading.Thread(target=threadProgress, args=(progress,))
     thread.daemon = True
     thread.start()
@@ -59,6 +62,7 @@ status_def = [
 ]
 
 body_def = [
+    [ ezwx.Gauge(expand=True,proportion=1,key="progress"), ], 
     [ ezwx.Button("Show Progress",expand=True,proportion=1,handler=onButton,key="button"),
       { 'expand' : True, 'proportion' : 1 } ], 
 ]
@@ -74,7 +78,7 @@ layout = {
 ######################################################################
 
 if __name__ == "__main__":
-    window = ezwx.WxApp(title, 120, 120)
+    window = ezwx.WxApp(title, 120, 160)
     window.makeLayout(layout)
     window.closeHandle(onClose)
     window.run()

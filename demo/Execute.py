@@ -4,21 +4,27 @@ import time
 import wx
 import ezWxPython as ew
 
+def initCtrls():
+    global label, idlecount, timercount
+    label = ew.getWxCtrl('label')
+    label.SetBackgroundColour(wx.Colour(200,200,240))
+    idlecount = 0
+    timercount = 0
+    
 def onExit(event):
     appWin.close()
    
+def onClose(event): #return True if want to exit
+    rv = appWin.messageYesNo("Alert", "Do you want to quit ?" )
+    return rv
+
 def onAbout(event):
     appWin.messageBox("About", "Menu Demo\nzdiv")
 
-def onButton(event):
-    multiple = appWin.getCheckState('multiple')
-    files = appWin.openFileDialog( multiple = multiple );
-    if multiple:
-        for f in files:
-            appWin.appendText('text',f + '\n')
-    else:
-        appWin.appendText('text',files + '\n')
-
+def onExecute(event):
+    #ew.Execute("cmd.exe /C dir /s C:\\", sync=False, show=True)
+    os.system("start dir /s C:\\")
+    
 menu_def = { 
     "File" : { 
         "Exit" : [ onExit, wx.ART_QUIT ],
@@ -29,10 +35,10 @@ menu_def = {
 }
 
 body_def = [
-    [ ew.Check("Enable multiple selection",expand=True,proportion=1,key='multiple'),
-      ew.Button("Open", handler=onButton), ], 
-    [ ew.Text('',multiline=True,expand=True,proportion=1,key='text'),
+    [ ew.Label("Hello ezWxPython",expand=True,proportion=1,key='label'),
       { 'expand' : True, 'proportion' : 1 } ], 
+    [ ew.Button("Execute",handler=onExecute,expand=True,proportion=1,),
+      ], 
 ]
 
 status_def = [
@@ -50,6 +56,8 @@ layout = {
 ######################################################################
 
 if __name__ == "__main__":
-    appWin = ew.WxApp(u"File Dialog Demo", 320, 240)
+    appWin = ew.WxApp(u"Menu Demo", 320, 240)
     appWin.makeLayout(layout)
+    initCtrls()
+    appWin.closeHandle(onClose)
     appWin.run()

@@ -10,7 +10,9 @@ def initCtrls():
     ew.getWxCtrl('top3').SetBackgroundColour(wx.Colour(160,160,240))
     ew.getWxCtrl('mid').SetBackgroundColour(wx.Colour(200,240,200))
     ew.getWxCtrl('bottom1').SetBackgroundColour(wx.Colour(240,200,200))
-    ew.getWxCtrl('bottom2').SetBackgroundColour(wx.Colour(240,180,180))
+    ew.getWxCtrl('bottom21').SetBackgroundColour(wx.Colour(240,180,180))
+    ew.getWxCtrl('bottom22').SetBackgroundColour(wx.Colour(240,180,180))
+    ew.getWxCtrl('bottom23').SetBackgroundColour(wx.Colour(240,180,180))
     ew.getWxCtrl('bottom3').SetBackgroundColour(wx.Colour(240,160,160))
     
 def setStatusText(text,index=0):
@@ -50,7 +52,9 @@ body_def = [
     [ ew.Line() ],
     [ ew.Label("Bottom1",expand=True,proportion=1,border=0,key='bottom1'), 
       ew.Panel( [
-        [ ew.Label("Bottom2",expand=True,proportion=1,border=0, key='bottom2'), 
+        [ ew.Label("Bottom21",expand=True,proportion=1,border=1, key='bottom21'), 
+          ew.Label("Bottom22",expand=True,proportion=1,border=1, key='bottom22'), 
+          ew.Label("Bottom23",expand=True,proportion=1,border=1, key='bottom23'), 
             { 'expand' : True, 'proportion' : 1, 'border' : 0 }
         ],
         [ ew.Label("Bottom3",expand=True,proportion=1,border=0,key='bottom3'), 

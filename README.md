@@ -182,9 +182,11 @@ Generated Form.
 * Calendar : wx.CalendarCtrl
 * Check : wx.CheckBox
 * Choice : wx.ChoiceBox
+* Clock : wx.lib.analogclock.analogclock.AnalogClock
 * Combo : wx.ComboBox
 * Date : wx.DatePickerCtrl -> moved to Picker
 * Label : wx.StaticText
+* LedNumber : wx.lib.gizmos.ledctrl.LEDNumberCtrl
 * Line : wx.StaticLine
 * Link : wx.adv.HyperlinkCtrl
 * List : wx.ListBox, wx.CheckListBox, wx.ListCtrl, wx.adv.EditableListBox
@@ -195,10 +197,14 @@ Generated Form.
 * Spin : wx.SpinCtrl
 * StyledText : wx.StyledTextCtrl
 * Text : wx.TextArea + drag and drop files
-* Ticker : wx.lib.tivker.Ticker
+* Ticker : wx.lib.tivker.Ticker : wx.lib.gizmos.ledctrl.LEDNumberCtrl
 * Time : wx.TimePickerCtrl -> moved to Picker
 * Tree : wx.TreeCtrl
 * Web : wx.lib.iewin.IEHtmlWindow
+
+### Compound Controls
+
+* FileBrowser : wx.Label + wx.TextCtrl + wx.Button
 
 ### Implemented Containers
 

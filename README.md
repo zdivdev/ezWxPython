@@ -174,6 +174,7 @@ Generated Form.
 * Custom PopupWin supports Modal
 * Window Caption Hide : Maximize, Minimize, Close, Titlebar ...
 * Drag Frame by Control 
+* Clipboard get text, html, filelist 
 
 ### Implemented Controls
 
@@ -206,6 +207,7 @@ Generated Form.
 ### Compound Controls
 
 * FileBrowser : wx.Label + wx.TextCtrl + wx.Button
+* ToolbarText : wx.Toolbar + wx.TextCtrl
 
 ### Implemented Containers
 

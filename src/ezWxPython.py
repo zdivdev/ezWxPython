@@ -54,6 +54,10 @@ def encodeIcon(filename):
         data = b64encode(compress(f.read()))
     return data
 
+def encodeIconToStr(filename):
+    icon = encodeIcon(filename)
+    return icon.decode('utf-8')
+    
 def decodeIcon(data):
     from base64 import b64decode
     from zlib import decompress
@@ -970,8 +974,82 @@ class Media(Control):
         self.ctrl.Play()
 
 ######################################################################
+# Clipboard
+######################################################################
+def GetClipboardText():
+    if not wx.TheClipboard.IsOpened():
+        do = wx.TextDataObject()
+        wx.TheClipboard.Open()
+        success = wx.TheClipboard.GetData(do)
+        wx.TheClipboard.Close()
+        if success:
+            return do.GetText()
+    return ''
+    
+def GetClipboardHtmlText():
+    if not wx.TheClipboard.IsOpened():
+        do = wx.HTMLDataObject()
+        wx.TheClipboard.Open()
+        success = wx.TheClipboard.GetData(do)
+        wx.TheClipboard.Close()
+        if success:
+            return do.GetHTML()
+    return ''
+    
+def GetClipboardFilenames():
+    if not wx.TheClipboard.IsOpened():
+        do = wx.FileDataObject()
+        wx.TheClipboard.Open()
+        success = wx.TheClipboard.GetData(do)
+        wx.TheClipboard.Close()
+        if success:
+            return do.Filenames
+    return []
+    
+    
+######################################################################
 # Compound Control
 ######################################################################
+class Toolbar(Control):
+    def __init__(self,tool_def, largeButton=False,expand=False,proportion=0,border=2,size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__(key=key,expand=expand,proportion=proportion,border=border,size=size,pos=pos)
+        self.ctrl = None
+        self.tool_def = tool_def
+        self.largeButton = largeButton
+    def create(self, parent):  #icon, text, handler
+        flags = wx.TB_FLAT|wx.TB_HORIZONTAL
+        if len(self.tool_def[0]) >= 3:
+            flags |= wx.TB_TEXT
+        self.ctrl = wx.ToolBar( parent, wx.ID_ANY, pos=wx.DefaultPosition, size=wx.DefaultSize, style=flags)
+        for value in self.tool_def:
+            if value[0] is None:
+                self.ctrl.AddSeparator()
+            else:
+                text = handler = tooltip = None
+                if len(value) >= 2:
+                    handler = value[1]
+                if len(value) >= 3:
+                    text = value[2]
+                if len(value) >= 4:
+                    tooltip = value[3]
+                if self.largeButton: 
+                    icon = getToolbarBitmap(value[0],size=(32,32))
+                else:
+                    icon = getToolbarBitmap(value[0],size=(24,24))
+                id = getId()
+                if text is not None:
+                    tool = self.ctrl.AddTool( id, text, icon, wx.NullBitmap, wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString, None )
+                else:
+                    tool = self.ctrl.AddTool( id, '', icon, wx.NullBitmap, wx.ITEM_NORMAL, wx.EmptyString, wx.EmptyString, None )
+                    #tool = self.ctrl.AddSimpleTool( id, icon, wx.EmptyString, wx.EmptyString, None )
+                if tooltip is not None:
+                    self.ctrl.SetToolShortHelp(id, tooltip);
+                if handler is None:
+                    tool.Enable( False )
+                else:
+                    self.ctrl.Bind( wx.EVT_TOOL, handler, id = id )
+        self.ctrl.Realize()
+
 class FileBrowser(Control): 
     def __init__(self,label=None,text=None,buttonText="Browse",handler=None,save=False,directory=False,expand=False,proportion=0,border=2,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
@@ -987,7 +1065,8 @@ class FileBrowser(Control):
     def create(self,parent):
         self.textCtrl = Text(self.text, expand=True, proportion=1, border=0)
         self.buttonCtrl = Button(self.buttonText, handler=self.onBrowse, border=0 )
-        if self.label: self.layout[0].append( Label(self.label, border=0) )
+        if self.label: 
+            self.layout[0].append( Label(self.label, border=0) )
         self.layout[0].append( self.textCtrl )
         self.layout[0].append( self.buttonCtrl )
         self.layout[0].append( { 'expand' : True, 'border' : 0 } )
@@ -1005,6 +1084,46 @@ class FileBrowser(Control):
             self.textCtrl.ctrl.AppendText(f)
             if self.handler: self.handler(f)
 
+class ToolbarText(Control): 
+    def __init__(self,tool_def=None,text='',largeButton=False,multiline=True,handler=None,expand=False,proportion=0,border=2,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__(key=key,expand=expand,proportion=proportion,border=border,size=size,pos=pos)
+        self.ctrl = None
+        self.layout = [[], []] #toolbar, text
+        self.tool_def = tool_def
+        self.text = text
+        self.largeButton = largeButton
+        self.multiline = multiline
+        self.handler = handler
+    def create(self,parent):
+        if self.tool_def is None:
+            self.largeButton = False
+            self.tool_def = [
+                [wx.ART_NEW  , self.onClear     , None, "Clear all text"],
+                [wx.ART_COPY , self.onCopy      , None, "Copy text to clipboard"],
+                [wx.ART_PASTE, self.onPaste     , None, "Paste text from clipboard"],
+                [wx.ART_PASTE, self.onPasteHtml , None, "Paste html text from clipboard"],
+            ]
+        self.toolbar = Toolbar(self.tool_def,self.largeButton)
+        self.textCtrl = Text(self.text, multiline=self.multiline, expand=True, proportion=1, border=0)
+        self.layout[0].append( self.toolbar )
+        self.layout[0].append( { 'expand' : True, 'border' : 0 } )
+        self.layout[1].append( self.textCtrl )
+        self.layout[1].append( { 'expand' : True, 'proportion' : 1, 'border' : 0 } )
+        vbox = makeLayout(self.layout,parent)
+        self.ctrl = vbox.ctrl
+        if self.key is not None:
+            registerCtrl( self.key, self.textCtrl )
+    def onClear(self,event):
+        self.textCtrl.ctrl.Clear()
+    def onCopy(self,event):
+        self.textCtrl.ctrl.Copy()
+    def onPaste(self,event):
+        self.textCtrl.ctrl.Paste()
+    def onPasteHtml(self,event):
+        self.textCtrl.ctrl.AppendText(GetClipboardHtmlText())
+
+                
 ######################################################################
 # Dialogs : deprecated use wxApp.*
 ######################################################################
@@ -1336,7 +1455,7 @@ class WxApp():
             ctrl.Bind(wx.EVT_LEFT_DOWN, self._dragLeftDownHandle)
 
     def _getContextMenuHandler(self,menu): 
-        def _contextMenuRightDown(event):
+        def _contextMenuRightDown(event): #closure
             self.frame.PopupMenu( menu, event.GetPosition() )
         return _contextMenuRightDown
 

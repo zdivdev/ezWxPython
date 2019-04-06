@@ -441,21 +441,46 @@ class Bitmap(Control):
 
 class Button(Control):
     def __init__(self,label="",handler=None,expand=False,proportion=0,border=2,
-                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None):
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None,kind=None):
         super().__init__(key=key,expand=expand,proportion=proportion,border=border,size=size,pos=pos,tooltip=tooltip)
         self.label = label
         self.handler = handler
+        self.kind = kind
     def create(self,parent):
         id = getId()
-        if type(self.label) is str: 
-            self.ctrl = wx.Button( parent, id, self.label, self.pos, self.size, 0 )
+        if type(self.label) is str:
+            if self.kind is None:
+                self.ctrl = wx.Button( parent, id, self.label, self.pos, self.size, 0 )
+                self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
+            elif self.kind is 'toggle':
+                self.ctrl = wx.ToggleButton( parent, id, self.label, self.pos, self.size, 0 )
+                self.ctrl.Bind( wx.EVT_TOGGLEBUTTON, self.handler, id=id )
+            elif self.kind is 'check':
+                self.ctrl = wx.CheckBox( parent, id, self.label, self.pos, self.size, 0 )
+                self.ctrl.Bind( wx.EVT_CHECKBOX, self.handler, id=id )
         else:
-            self.ctrl = wx.BitmapButton( parent, id, getButtonBitmap(self.label), self.pos, self.size, 0 )
-        self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
+            if self.kind is None: 
+                self.ctrl = wx.BitmapButton( parent, id, getButtonBitmap(self.label), self.pos, self.size, 0 )
+                self.ctrl.Bind( wx.EVT_BUTTON, self.handler, id=id )
+            elif self.kind is 'toggle': #TODO: check operation
+                self.ctrl = wx.BitmapToggleButton( parent, id, getButtonBitmap(self.label), self.pos, self.size, 0 ) 
+                self.ctrl.Bind( wx.EVT_TOGGLEBUTTON, self.handler, id=id )
         if self.tooltip is not None:
             self.ctrl.SetToolTip(wx.ToolTip(self.tooltip))
         if self.key is not None:
             registerCtrl( self.key, self )
+
+class ToggleButton(Button):
+    def __init__(self,label="",handler=None,expand=False,proportion=0,border=2,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None):
+        super().__init__(label=label,handler=handler,expand=expand,proportion=proportion,
+                border=border,size=size,pos=pos,key=key,tooltip=tooltip,kind='toggle')
+
+class CheckButton(Button):
+    def __init__(self,label="",handler=None,expand=False,proportion=0,border=2,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None):
+        super().__init__(label=label,handler=handler,expand=expand,proportion=proportion,
+                border=border,size=size,pos=pos,key=key,tooltip=tooltip,kind='check')
 
 class Calendar(Control):
     def __init__(self,handler=None,date=None,expand=False,proportion=0,border=2,
@@ -833,18 +858,20 @@ class StyledText(Control):
 class Text(Control):
     def __init__(self,text="",expand=True,proportion=0,border=2,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,
-                 multiline=False,password=False,readonly=False,key=None):
+                 multiline=False,password=False,readonly=False,wrap=True,key=None):
         super().__init__(key=key,expand=expand,proportion=proportion,border=border,size=size,pos=pos)
         self.text = text
         self.multiline = multiline
         self.password = password
         self.readonly = readonly
+        self.wrap = wrap
         #self.expand = True if multiline == True else False
     def create(self,parent):
         flags = 0
         flags |= wx.TE_MULTILINE if self.multiline is True else 0
         flags |= wx.TE_PASSWORD if self.password is True else 0
         flags |= wx.TE_READONLY if self.readonly is True else 0
+        flags |= wx.TE_DONTWRAP if self.wrap is False else 0
         self.ctrl = wx.TextCtrl( parent, wx.ID_ANY, self.text, self.pos, self.size, 0|flags )
         drop_target = FileDrop(self)
         self.ctrl.SetDropTarget(drop_target)
@@ -994,7 +1021,7 @@ def GetClipboardHtmlText():
         wx.TheClipboard.Close()
         if success:
             return do.GetHTML()
-    return ''
+    return 'No Html Data'
     
 def GetClipboardFilenames():
     if not wx.TheClipboard.IsOpened():
@@ -1063,10 +1090,10 @@ class FileBrowser(Control):
         self.save = save
         self.directory = directory
     def create(self,parent):
-        self.textCtrl = Text(self.text, expand=True, proportion=1, border=0)
-        self.buttonCtrl = Button(self.buttonText, handler=self.onBrowse, border=0 )
+        self.textCtrl = Text(self.text, expand=True, proportion=1, border=2)
+        self.buttonCtrl = Button(self.buttonText, handler=self.onBrowse, border=2 )
         if self.label: 
-            self.layout[0].append( Label(self.label, border=0) )
+            self.layout[0].append( Label(self.label, border=2) )
         self.layout[0].append( self.textCtrl )
         self.layout[0].append( self.buttonCtrl )
         self.layout[0].append( { 'expand' : True, 'border' : 0 } )
@@ -1084,6 +1111,12 @@ class FileBrowser(Control):
             self.textCtrl.ctrl.AppendText(f)
             if self.handler: self.handler(f)
 
+class DirectoryBrowser(FileBrowser):
+    def __init__(self,label=None,text=None,buttonText="Browse",handler=None,save=False,expand=False,proportion=0,border=2,
+                 size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
+        super().__init__(label=label,text=text,buttonText=buttonText,handler=handler,save=save,directory=True,expand=expand,proportion=proportion,border=border,
+                    size=size,pos=pos,key=key)
+        
 class ToolbarText(Control): 
     def __init__(self,tool_def=None,text='',largeButton=False,multiline=True,handler=None,expand=False,proportion=0,border=2,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
@@ -1546,14 +1579,27 @@ class WxApp():
         panel = Panel(layout,dlg,create=True)
         dlg.ShowModal()
         dlg.Destroy()
-                
+
+    # Common Control: ToggleButton, CheckBox
+    def getValue(self,key):
+        ctrl = getWxCtrl(key)
+        if ctrl is not None:
+            return ctrl.GetValue() 
+        else:
+            return None
+
+    def setValue(self,key,value):
+        ctrl = getWxCtrl(key)
+        if ctrl is not None:
+            ctrl.SetValue(value) 
+                       
     # Check Button Control
     def getCheckState(self,key): 
         ctrl = getWxCtrl(key)
         if ctrl is not None:
             return ctrl.GetValue() 
         else:
-            return False
+            return None
 
     # Choice, Bombo, List Control
     def getSelectedText(self,key): 
@@ -1582,6 +1628,15 @@ class WxApp():
         if ctrl is not None:
             ctrl.AppendText(text) 
 
+    #def setWrap(self,key,wrap=True):
+    #    ctrl = getWxCtrl(key)
+    #    if ctrl is not None:
+    #        ws = ctrl.GetWindowStyle()
+    #        if wrap is True:
+    #            ctrl.SetWindowStyle(ws & ~wx.TE_DONTWRAP ) #| wx.TE_BESTWRAP
+    #        else:
+    #            ctrl.SetWindowStyle(ws | wx.TE_DONTWRAP) #& ~wx.TE_BESTWRAP 
+        
     # Ticker Control
     def setTickerText(self,key,text): 
         ctrl = getWxCtrl(key)

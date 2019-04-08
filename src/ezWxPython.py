@@ -879,9 +879,10 @@ class Text(Control):
             registerCtrl( self.key, self )
     def drop_handle(self,filenames):
         for filename in filenames:
-            self.ctrl.AppendText( filename + '\n' )
+            self.ctrl.AppendText( filename )
             if self.multiline is False:
                 break
+            self.ctrl.AppendText( '\n' )
 
 class Ticker(Control):
     import wx.lib.ticker

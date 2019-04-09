@@ -822,17 +822,18 @@ class Spin(Control):
     def create(self,parent):
         id = getId()
         flags = wx.SP_ARROW_KEYS
-        self.ctrl = wx.SpinCtrl( parent, wx.ID_ANY, self.value, self.pos, self.size, 0|flags, self.minValue, self.maxValue )
+        self.ctrl = wx.SpinCtrl( parent, id, self.value, self.pos, self.size, 0|flags, self.minValue, self.maxValue )
         self.ctrl.Bind( wx.EVT_SPIN, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
 
 class StyledText(Control):
     import wx.stc
-    def __init__(self,text="",expand=True,proportion=1,border=2,
+    def __init__(self,text="",handler=None,expand=True,proportion=1,border=2,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key=key,expand=expand,proportion=proportion,border=border,size=size,pos=pos)
         self.text = text
+        self.handler = handler        
     def create(self,parent):
         flags = 0
         self.ctrl = wx.stc.StyledTextCtrl( parent, wx.ID_ANY, self.pos, self.size, 0|flags )
@@ -856,7 +857,7 @@ class StyledText(Control):
         self.ctrl.SetMarginWidth(2, 16) # 2,25
 
 class Text(Control):
-    def __init__(self,text="",expand=True,proportion=0,border=2,
+    def __init__(self,text="",handler=None,expand=True,proportion=0,border=2,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,
                  multiline=False,password=False,readonly=False,wrap=True,key=None):
         super().__init__(key=key,expand=expand,proportion=proportion,border=border,size=size,pos=pos)
@@ -865,14 +866,18 @@ class Text(Control):
         self.password = password
         self.readonly = readonly
         self.wrap = wrap
+        self.handler = handler
         #self.expand = True if multiline == True else False
     def create(self,parent):
+        id = getId()
         flags = 0
         flags |= wx.TE_MULTILINE if self.multiline is True else 0
         flags |= wx.TE_PASSWORD if self.password is True else 0
         flags |= wx.TE_READONLY if self.readonly is True else 0
         flags |= wx.TE_DONTWRAP if self.wrap is False else 0
-        self.ctrl = wx.TextCtrl( parent, wx.ID_ANY, self.text, self.pos, self.size, 0|flags )
+        self.ctrl = wx.TextCtrl( parent, id, self.text, self.pos, self.size, 0|flags )
+        self.ctrl.Bind( wx.EVT_TEXT, self.handler, id=id )
+        #self.ctrl.Bind( wx.EVT_CHAR, self.handler )
         drop_target = FileDrop(self)
         self.ctrl.SetDropTarget(drop_target)
         if self.key is not None:

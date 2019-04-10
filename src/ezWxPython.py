@@ -29,6 +29,30 @@ def getCtrl(name):
     else:
         return None
 
+def getValue(key):
+    ctrl = getCtrl(key)
+    if ctrl is not None:
+        return ctrl.getValue() 
+    else:
+        return None
+
+def setValue(key,value):
+    ctrl = getCtrl(key)
+    if ctrl is not None:
+        ctrl.setValue(value) 
+ 
+def setFgColor(key,color):
+    ctrl = getWxCtrl(key)
+    if ctrl is not None:
+        ctrl.SetForegroundColour(color)
+        ctrl.Refresh()
+
+def setBgColor(key,color):
+    ctrl = getWxCtrl(key)
+    if ctrl is not None:
+        ctrl.SetBackgroundColour(color)
+        ctrl.Refresh()
+        
 def getWxCtrl(name):
     global CtrlTable
     if name in CtrlTable:
@@ -438,6 +462,10 @@ class Bitmap(Control):
     def onEvtBitmapSize(self,event):
         #print("onEvtBitmapSize()",event.GetSize()) #(width, height)
         event.Skip()
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Button(Control):
     def __init__(self,label="",handler=None,expand=False,proportion=0,border=2,
@@ -469,6 +497,10 @@ class Button(Control):
             self.ctrl.SetToolTip(wx.ToolTip(self.tooltip))
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        return self.ctrl.GetLabel()
+    def setValue(self,item):
+        self.ctrl.SetLabel(item)
 
 class ToggleButton(Button):
     def __init__(self,label="",handler=None,expand=False,proportion=0,border=2,
@@ -494,6 +526,10 @@ class Calendar(Control):
         self.ctrl.Bind( wx.adv.EVT_CALENDAR_SEL_CHANGED, self.handler )
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 #class Calendar2(Control):
 #    import wx.lib.calendar
@@ -518,6 +554,10 @@ class Check(Control):
         self.ctrl.Bind( wx.EVT_CHECKBOX, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Choice(Control):
     def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,border=2,
@@ -533,6 +573,12 @@ class Choice(Control):
         self.ctrl.Bind( wx.EVT_CHOICE, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self,):
+        return self.ctrl.GetString(self.ctrl.GetCurrentSelection())
+    def setValue(self,item):
+        n = self.ctrl.FindString(item)
+        if n != wx.NOT_FOUND:
+            self.ctrl.SetSelection(n)
 
 class Clock(Control):
     import wx.lib.analogclock
@@ -545,9 +591,13 @@ class Clock(Control):
         self.ctrl = wx.lib.analogclock.analogclock.AnalogClock( parent, wx.ID_ANY, self.pos, self.size, wx.NO_BORDER)
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Combo(Control):
-    def __init__(self,choices=[],value="",handler=None,expand=False,proportion=0,border=2,
+    def __init__(self,choices=[],value=None,handler=None,expand=False,proportion=0,border=2,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None):
         super().__init__(key=key,expand=expand,proportion=proportion,border=border,size=size,pos=pos)
         self.choices = choices
@@ -555,10 +605,17 @@ class Combo(Control):
         self.handler = handler
     def create(self,parent):
         id = getId()
+        if self.value is None:
+            self.value = self.choices[0]
         self.ctrl = wx.ComboBox( parent, id, self.value, self.pos, self.size, self.choices, 0 )
+        #self.ctrl.SetValue(self.value)
         self.ctrl.Bind( wx.EVT_COMBOBOX, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self,):
+        return self.ctrl.GetValue()
+    def setValue(self,item):
+        self.ctrl.SetValue(item)
 
 class Date(Control):
     def __init__(self,date=None,expand=False,proportion=0,border=2,
@@ -569,6 +626,10 @@ class Date(Control):
         self.ctrl = wx.adv.DatePickerCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, self.pos, self.size, wx.adv.TP_DEFAULT )
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Gauge(Control): #842
     def __init__(self,expand=False,proportion=0,border=2,
@@ -588,7 +649,11 @@ class Gauge(Control): #842
         wx.CallAfter(self.pulseAfter)
     def pulseAfter(self):
         self.ctrl.Pulse()
-       
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
+
 class Label(Control):
     def __init__(self,text="",expand=False,proportion=0,border=2,multiline=False,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,key=None,tooltip=None,align='center'):
@@ -607,7 +672,11 @@ class Label(Control):
             self.ctrl.SetToolTip(wx.ToolTip(self.tooltip))
         if self.key is not None:
             registerCtrl( self.key, self )
-
+    def getValue(self):
+        return self.ctrl.GetLabel()
+    def setValue(self,item):
+        self.ctrl.SetLabel(item)
+        
 class LedNumber(Control):
     import wx.lib.gizmos.ledctrl
     def __init__(self,text="",expand=False,proportion=0,border=2,
@@ -620,6 +689,10 @@ class LedNumber(Control):
         self.ctrl.SetValue(self.text)
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Line(Control):
     def __init__(self,text="",expand=False,proportion=0,border=2,style="horizontal",
@@ -644,6 +717,10 @@ class Link(Control):
             self.ctrl.SetToolTip(wx.ToolTip(self.tooltip))
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class List(Control):
     def __init__(self,choices=[],select=0,handler=None,expand=False,proportion=0,border=2,
@@ -689,6 +766,12 @@ class List(Control):
     def drop_handle(self,filenames):
         for filename in filenames:
             self.ctrl.Append(filename)
+    def getValue(self,):
+        return self.ctrl.GetString(self.ctrl.GetSelection())
+    def setValue(self,item):
+        n = self.ctrl.FindString(item)
+        if n != wx.NOT_FOUND:
+            self.ctrl.SetSelection(n)
 
 class Picker(Control):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,border=2,
@@ -727,6 +810,10 @@ class Picker(Control):
             pass
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class DirPicker(Picker):
     def __init__(self,style="",value=None,handler=None,expand=False,proportion=0,border=2,
@@ -773,7 +860,11 @@ class Progress(Control):
         wx.CallAfter(self.callAfter, percent)
     def callAfter(self,percent):
         self.ctrl.SetValue(percent)
- 
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
+
 class Radio(Control):
     def __init__(self,label="",choices=[],value="",handler=None,expand=False,proportion=0,border=2,
                  size=wx.DefaultSize,pos=wx.DefaultPosition,style='row',key=None):
@@ -793,6 +884,10 @@ class Radio(Control):
                 break
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Slider(Control):
     def __init__(self,text="",value=0,minValue=0,maxValue=100,handler=None,expand=False,proportion=0,border=2,
@@ -810,6 +905,10 @@ class Slider(Control):
         self.ctrl.Bind( wx.EVT_SLIDER, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Spin(Control):
     def __init__(self,text="",value="",minValue=0,maxValue=100,handler=None,expand=False,proportion=0,border=2,
@@ -826,6 +925,10 @@ class Spin(Control):
         self.ctrl.Bind( wx.EVT_SPIN, self.handler, id=id )
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class StyledText(Control):
     import wx.stc
@@ -855,6 +958,10 @@ class StyledText(Control):
         self.ctrl.SetMarginSensitive(2, True)
         self.ctrl.SetMarginWidth(1, 32) # 2,25
         self.ctrl.SetMarginWidth(2, 16) # 2,25
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Text(Control):
     def __init__(self,text="",handler=None,expand=True,proportion=0,border=2,
@@ -888,7 +995,11 @@ class Text(Control):
             if self.multiline is False:
                 break
             self.ctrl.AppendText( '\n' )
-
+    def getValue(self,):
+        return self.ctrl.GetValue() 
+    def setValue(self,item):
+        self.ctrl.SetValue(item) 
+ 
 class Ticker(Control):
     import wx.lib.ticker
     def __init__(self,text="",fgcolor=wx.BLACK,bgcolor=wx.WHITE,expand=True,proportion=0,border=2,
@@ -905,6 +1016,10 @@ class Ticker(Control):
     def onClose(self,event):
         self.ctrl.Stop()
         event.Skip()
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Time(Control):
     def __init__(self,date=None,expand=False,proportion=0,border=2,
@@ -915,7 +1030,10 @@ class Time(Control):
         self.ctrl = wx.adv.TimePickerCtrl( parent, wx.ID_ANY, wx.DefaultDateTime, self.pos, self.size, wx.adv.TP_DEFAULT )
         if self.key is not None:
             registerCtrl( self.key, self )
-
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Tree(Control):
     def __init__(self,data=None,collapse=False,handler=None,expand=False,proportion=0,border=2,
@@ -943,6 +1061,10 @@ class Tree(Control):
                 self.addItems(node,item)
             else: #list
                 node = self.ctrl.AppendItem(parent,item)
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class Web(Control):
     import wx.lib.iewin
@@ -958,7 +1080,11 @@ class Web(Control):
                 self.ctrl.LoadUrl(self.url)
             if self.key is not None:
                 registerCtrl( self.key, self )
-                
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
+
 class PdfWin(Control):
     import wx.lib.pdfwin
     def __init__(self,url=None,expand=False,proportion=0,border=2,
@@ -971,6 +1097,10 @@ class PdfWin(Control):
             self.ctrl.LoadFile(self.url)
         if self.key is not None:
             registerCtrl( self.key, self )
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 class PdfView(Control):
     import wx.lib.pdfviewer
@@ -989,7 +1119,11 @@ class PdfView(Control):
             self.ctrl.LoadFile(self.url)
         if self.key is not None:
             registerCtrl( self.key, self )
-                
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
+ 
 class Media(Control):
     import wx.media
     def __init__(self,url=None,expand=False,proportion=0,border=2,
@@ -1005,6 +1139,10 @@ class Media(Control):
             registerCtrl( self.key, self )
     def onLoaded(self,event):
         self.ctrl.Play()
+    def getValue(self):
+        pass
+    def setValue(self,item):
+        pass
 
 ######################################################################
 # Clipboard
@@ -1588,16 +1726,16 @@ class WxApp():
 
     # Common Control: ToggleButton, CheckBox
     def getValue(self,key):
-        ctrl = getWxCtrl(key)
+        ctrl = getCtrl(key)
         if ctrl is not None:
-            return ctrl.GetValue() 
+            return ctrl.getValue() 
         else:
             return None
 
     def setValue(self,key,value):
-        ctrl = getWxCtrl(key)
+        ctrl = getCtrl(key)
         if ctrl is not None:
-            ctrl.SetValue(value) 
+            ctrl.setValue(value) 
                        
     # Check Button Control
     def getCheckState(self,key): 
